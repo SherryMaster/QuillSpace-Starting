@@ -1,11 +1,11 @@
 import './App.css'
 import { ContentBlock } from "./components/contentblock/ContentBlock";
-import { InteractiveContentLayout } from "./components/layout/InteractiveContentLayout";
+import { ThemedInteractiveContentLayout } from "./components/layout/ThemedInteractiveContentLayout";
 import { removeCommonIndentation } from "./utils/common";
 
 function App() {
   return (
-    <InteractiveContentLayout
+    <ThemedInteractiveContentLayout
       title="The Ultimate 'QuillSpace' Guide"
       titleBG="dark"
       subtitle="A comprehensive guide to creating interactive documentation with the Notes framework."
@@ -61,7 +61,7 @@ function App() {
       </ContentBlock>
       </ContentBlock>
       
-    </InteractiveContentLayout>
+    </ThemedInteractiveContentLayout>
   );
 }
 
