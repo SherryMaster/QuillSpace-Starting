@@ -270,19 +270,6 @@
     @apply opacity-100;
   }
 
-  .phase-container {
-    @apply relative isolate transition-all duration-300;
-  }
-
-  .phase-container::before {
-    @apply absolute inset-0 -z-10 bg-gradient-to-br from-accent/5 to-transparent
-           opacity-50 transition-opacity duration-300 content-[''];
-  }
-
-  .phase-container:hover::before {
-    @apply opacity-100;
-  }
-
   .toc-container {
     @apply transition-all duration-300 hover:shadow-lg;
   }
@@ -294,7 +281,6 @@
   .chapter-container:last-child {
     @apply border-b-0 pb-0 mb-0;
   }
-
 /* Base styles */
 @layer base {
   * {
@@ -320,54 +306,31 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    @apply bg-transparent hover:bg-primary/5 
+           transition-colors duration-300;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary/40 
-           hover:bg-primary/60 
-           active:bg-primary/80
+    @apply bg-primary/30 
+           hover:bg-primary/50 
+           active:bg-primary/70
            rounded-full
-           transition-colors
-           duration-200;
+           transition-all duration-300
+           hover:shadow-lg
+           hover:scale-105
+           cursor-pointer;
+  }
+
+  /* Dark mode styles */
+  .dark ::-webkit-scrollbar-track {
+    @apply hover:bg-primary/10;
   }
 
   .dark ::-webkit-scrollbar-thumb {
-    @apply bg-primary/30 
-           hover:bg-primary/50
-           active:bg-primary/70;
-  }
-}
-
-/* Scrollbar configuration */
-@layer utilities {
-  .custom-scrollbar {
-    @apply relative;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-primary) transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar {
-    @apply w-1.5;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-primary/40 
-           hover:bg-primary/60 
-           active:bg-primary/80
-           rounded-full
-           transition-colors
-           duration-200;
-  }
-
-  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-primary/30 
-           hover:bg-primary/50
-           active:bg-primary/70;
+    @apply bg-primary/20 
+           hover:bg-primary/40
+           active:bg-primary/60
+           hover:shadow-primary/20;
   }
 }
 
@@ -389,25 +352,69 @@
   }
 }
 
-@layer utilities {
   /* Add text truncation utilities */
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Add tooltip for truncated text */
-  .toc-item-tooltip {
-    @apply invisible absolute z-50 px-2 py-1 text-xs
-           bg-popover text-popover-foreground rounded-md
-           shadow-md opacity-0 transition-all duration-200
-           -translate-y-2 max-w-[200px] break-words;
-  }
-
-  .group:hover .toc-item-tooltip {
-    @apply visible opacity-100 translate-y-0;
-  }
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
+/* Add tooltip for truncated text */
+.toc-item-tooltip {
+  @apply invisible absolute z-50 px-2 py-1 text-xs
+          bg-popover text-popover-foreground rounded-md
+          shadow-md opacity-0 transition-all duration-200
+          -translate-y-2 max-w-[200px] break-words;
+}
+
+.group:hover .toc-item-tooltip {
+  @apply visible opacity-100 translate-y-0;
+}
+
+/* Add this to your existing styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  @apply w-2; /* Matches the main scrollbar width */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent hover:bg-primary/5 
+         transition-colors duration-300;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-primary/30 
+         hover:bg-primary/50 
+         active:bg-primary/70
+         rounded-full
+         transition-all duration-300
+         hover:shadow-lg
+         hover:scale-105
+         cursor-pointer;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  @apply hover:bg-primary/10;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-primary/20 
+         hover:bg-primary/40
+         active:bg-primary/60
+         hover:shadow-primary/20;
+}
+
+/* Hide main scrollbar but keep functionality */
+.hide-main-scrollbar {
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.hide-main-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
