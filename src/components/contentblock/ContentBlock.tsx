@@ -19,7 +19,11 @@ import {
   LucideIcon,
   Info,
   HelpCircle,
-  InfoIcon
+  InfoIcon,
+  Film,
+  Music,
+  Image as ImageIcon,
+  Play
 } from "lucide-react";
 import { FileStructureView } from './FileStructureView';
 import { CodeHighlighter } from "./CodeHighlighter";
@@ -29,6 +33,40 @@ import { IconProps } from '@/utils/iconUtils';
 import { cn } from '@/utils/common';
 import { type ColorToken } from '@/types/colors';
 import { getColorClass } from '@/utils/colors';
+import type { MediaType } from '@/types/media';
+import { MediaBlock } from './MediaBlock';
+
+export const mediaTypeConfig: Record<MediaType, {
+  icon: LucideIcon;
+  containerClass: string;
+  badgeClass: string;
+  iconProps?: Partial<IconProps>;
+}> = {
+  Video: {
+    icon: Film,
+    containerClass: "border-purple-500/20 bg-purple-500/5",
+    badgeClass: "bg-purple-500/10 text-purple-500",
+    iconProps: { size: 16 }
+  },
+  Audio: {
+    icon: Music,
+    containerClass: "border-blue-500/20 bg-blue-500/5",
+    badgeClass: "bg-blue-500/10 text-blue-500",
+    iconProps: { size: 16 }
+  },
+  Image: {
+    icon: ImageIcon,
+    containerClass: "border-green-500/20 bg-green-500/5",
+    badgeClass: "bg-green-500/10 text-green-500",
+    iconProps: { size: 16 }
+  },
+  GIF: {
+    icon: Play,
+    containerClass: "border-yellow-500/20 bg-yellow-500/5",
+    badgeClass: "bg-yellow-500/10 text-yellow-500",
+    iconProps: { size: 16 }
+  }
+};
 
 export interface IconConfig {
   icon?: LucideIcon;
@@ -57,7 +95,7 @@ interface FeatureStats {
 }
 
 // Enhanced base interface
-interface BaseBlockProps {
+export interface BaseBlockProps {
   title: string;
   subtitle?: string;
   description?: ReactNode;
@@ -113,14 +151,74 @@ interface MarkdownBlockProps extends BaseBlockProps {
   content: string;
 }
 
+interface MediaBlockProps extends BaseBlockProps {
+  type: "Media";
+  url: string;
+  mediaType: MediaType;
+  aspectRatio?: string;
+  autoPlay?: boolean;
+  controls?: boolean;
+}
+
 export type ContentBlockProps = 
   | ClassicBlockProps 
   | GenericBlockProps 
-  | NoteBlockProps        // Make sure this is included
+  | NoteBlockProps
   | FileStructureBlockProps 
-  | ChallengeBlockProps 
-  | CodeBlockProps 
-  | MarkdownBlockProps;  // Removed ProjectBlockProps
+  | ChallengeBlockProps
+  | CodeBlockProps
+  | MarkdownBlockProps
+  | MediaBlockProps;
+
+const noteTypeConfig: Record<NoteBlockProps['noteType'], {
+    containerClass: string;
+    contentClass: string;
+    textClass: string;
+    bgClass: string;
+    iconClass: string;
+    icon: LucideIcon;
+}> = {
+    primary: {
+      containerClass: `border-2 ${getColorClass('blue-500', 'border', 20)} ${getColorClass('blue-500', 'bg', 5)}`,
+      contentClass: getColorClass('blue-500', 'bg', 5),
+      textClass: "text-blue-700 dark:text-blue-300",
+      bgClass: getColorClass('blue-500', 'bg', 10),
+      iconClass: getColorClass('blue-500', 'text'),
+      icon: InfoIcon
+    },
+    secondary: {
+      containerClass: `border-2 ${getColorClass('gray-500', 'border', 20)} ${getColorClass('gray-500', 'bg', 5)}`,
+      contentClass: getColorClass('gray-500', 'bg', 5),
+      textClass: "text-gray-700 dark:text-gray-300",
+      bgClass: getColorClass('gray-500', 'bg', 10),
+      iconClass: getColorClass('gray-500', 'text'),
+      icon: HelpCircle
+    },
+    info: {
+      containerClass: `border-2 ${getColorClass('cyan-500', 'border', 20)} ${getColorClass('cyan-500', 'bg', 5)}`,
+      contentClass: getColorClass('cyan-500', 'bg', 5),
+      textClass: "text-cyan-700 dark:text-cyan-300",
+      bgClass: getColorClass('cyan-500', 'bg', 10),
+      iconClass: getColorClass('cyan-500', 'text'),
+      icon: Info
+    },
+    warning: {
+      containerClass: `border-2 ${getColorClass('yellow-500', 'border', 20)} ${getColorClass('yellow-500', 'bg', 5)}`,
+      contentClass: getColorClass('yellow-500', 'bg', 5),
+      textClass: "text-yellow-700 dark:text-yellow-300",
+      bgClass: getColorClass('yellow-500', 'bg', 10),
+      iconClass: getColorClass('yellow-500', 'text'),
+      icon: AlertTriangle
+    },
+    critical: {
+      containerClass: `border-2 ${getColorClass('red-500', 'border', 20)} ${getColorClass('red-500', 'bg', 5)}`,
+      contentClass: getColorClass('red-500', 'bg', 5),
+      textClass: "text-red-700 dark:text-red-300",
+      bgClass: getColorClass('red-500', 'bg', 10),
+      iconClass: getColorClass('red-500', 'text'),
+      icon: AlertOctagon
+    }
+};
 
 const DEFAULT_BLOCK_ICONS: Record<ContentBlockProps["type"], LucideIcon | ((props: ContentBlockProps) => LucideIcon)> = {
   Classic: Layout,
@@ -140,7 +238,14 @@ const DEFAULT_BLOCK_ICONS: Record<ContentBlockProps["type"], LucideIcon | ((prop
     return Target;
   },
   Code: Code,
-  Markdown: FileText
+  Markdown: FileText,
+  Media: (props: ContentBlockProps) => {
+    if (props.type === "Media") {
+      const mediaProps = props as MediaBlockProps;
+      return mediaTypeConfig[mediaProps.mediaType].icon;
+    }
+    return Film;  // Default to Film icon if type check fails
+  },
 };
 
 const getBlockIcon = (props: ContentBlockProps): LucideIcon => {
@@ -162,6 +267,26 @@ const getBlockIcon = (props: ContentBlockProps): LucideIcon => {
 };
 
 const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
+  const initialConfig: BlockConfig = {
+    icon: Box,
+    containerClass: "bg-background",
+    badgeClass: "bg-primary/10 text-primary",
+    contentClass: "bg-background"
+  };
+
+  // Add media block configuration
+  if (props.type === "Media") {
+    const mediaProps = props as MediaBlockProps;
+    const mediaConfig = mediaTypeConfig[mediaProps.mediaType];
+    return {
+      ...initialConfig,
+      icon: mediaConfig.icon,
+      containerClass: mediaConfig.containerClass,
+      badgeClass: mediaConfig.badgeClass,
+      iconProps: mediaConfig.iconProps
+    };
+  }
+
   const icon = getBlockIcon(props);
   
   const blockConfigs: Record<ContentBlockProps["type"], BlockConfig> = {
@@ -214,6 +339,12 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
       containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
       badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
       contentClass: getColorClass('gray-500', 'bg', 5)
+    },
+    Media: {
+      icon,
+      containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
+      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
+      contentClass: getColorClass('gray-500', 'bg', 5)
     }
   };
 
@@ -245,52 +376,26 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
     };
   }
 
+  if (props.type === "Note" && (props as NoteBlockProps).noteType) {
+    const noteType = (props as NoteBlockProps).noteType;
+    const noteConfig = noteTypeConfig[noteType];
+    config = {
+      ...config,
+      icon: noteConfig.icon,
+      containerClass: noteConfig.containerClass,
+      contentClass: noteConfig.contentClass,
+      badgeClass: noteConfig.bgClass,
+      iconProps: {
+        className: cn("w-5 h-5", noteConfig.iconClass),
+        size: props.iconConfig?.size || 20
+      }
+    };
+  }
+
   return config;
 };
 
-const noteTypeConfig: Record<NoteBlockProps['noteType'], {
-  containerClass: string;
-  textClass: string;
-  bgClass: string;
-  iconClass: string;
-  icon: LucideIcon;
-}> = {
-  primary: {
-    containerClass: "border-blue-500/20 bg-blue-500/5",
-    textClass: "text-blue-700 dark:text-blue-300",
-    bgClass: "bg-blue-500/10",
-    iconClass: "text-blue-500",
-    icon: InfoIcon
-  },
-  secondary: {
-    containerClass: "border-gray-500/20 bg-gray-500/5",
-    textClass: "text-gray-700 dark:text-gray-300",
-    bgClass: "bg-gray-500/10",
-    iconClass: "text-gray-500",
-    icon: HelpCircle
-  },
-  info: {
-    containerClass: "border-cyan-500/20 bg-cyan-500/5",
-    textClass: "text-cyan-700 dark:text-cyan-300",
-    bgClass: "bg-cyan-500/10",
-    iconClass: "text-cyan-500",
-    icon: Info
-  },
-  warning: {
-    containerClass: "border-yellow-500/20 bg-yellow-500/5",
-    textClass: "text-yellow-700 dark:text-yellow-300",
-    bgClass: "bg-yellow-500/10",
-    iconClass: "text-yellow-500",
-    icon: AlertTriangle
-  },
-  critical: {
-    containerClass: "border-red-500/20 bg-red-500/5",
-    textClass: "text-red-700 dark:text-red-300",
-    bgClass: "bg-red-500/10",
-    iconClass: "text-red-500",
-    icon: AlertOctagon
-  }
-};
+
 
 // Add a utility function to calculate feature stats
 function calculateFeatureStats(children: ReactNode): FeatureStats {
@@ -555,7 +660,9 @@ export function ContentBlock(props: ContentBlockProps) {
     'data-show-toc': showOnTOC,
     'data-parent-id': parentId,
     'data-block-icon': config.icon.displayName || config.icon.name || 'Box',
-    'data-block-color': props.type === "Note" 
+    'data-block-color': props.type === "Media" 
+      ? `text-${mediaTypeConfig[(props as MediaBlockProps).mediaType].badgeClass.split('-')[1]}`
+      : props.type === "Note" 
       ? noteTypeConfig[(props as NoteBlockProps).noteType].iconClass
       : props.type === "Challenge"
       ? (props as ChallengeBlockProps).challengeType === "Project" 
@@ -570,6 +677,9 @@ export function ContentBlock(props: ContentBlockProps) {
       'data-note-type': (props as NoteBlockProps).noteType,
       'data-note-icon': noteTypeConfig[(props as NoteBlockProps).noteType].icon.name
     }),
+    ...(props.type === "Media" && {
+      'data-media-type': (props as MediaBlockProps).mediaType,
+    }),
     className: cn(
       'content-block',
       props.type !== "Classic" && "border-2 p-6 backdrop-blur-sm rounded-lg",
@@ -579,6 +689,8 @@ export function ContentBlock(props: ContentBlockProps) {
         [config.containerClass]: props.type !== "Classic" && props.type !== "Note" && props.type !== "FileStructureView",
         'border-purple-500/20': props.type === "Challenge" && (props as ChallengeBlockProps).challengeType === "Project",
         'border-blue-500/20': props.type === "Challenge" && (props as ChallengeBlockProps).challengeType !== "Project",
+        [mediaTypeConfig[(props as MediaBlockProps).mediaType]?.containerClass]: 
+          props.type === "Media",
       },
       props.className
     ),
@@ -666,10 +778,16 @@ export function ContentBlock(props: ContentBlockProps) {
           : "opacity-0 invisible h-0 overflow-hidden"
       }`}>
         {/* Block's own content based on type */}
-        <div className="space-y-4">
+        <div className={cn("space-y-4", config.contentClass)}>
           {props.type === "Note" && (
-            <div className={`rounded-lg p-4 ${noteTypeConfig[(props as NoteBlockProps).noteType].containerClass}`}>
-              <div className={`text-base ${noteTypeConfig[(props as NoteBlockProps).noteType].textClass}`}>
+            <div className={cn(
+              "rounded-lg p-4",
+              noteTypeConfig[(props as NoteBlockProps).noteType].contentClass
+            )}>
+              <div className={cn(
+                "text-base",
+                noteTypeConfig[(props as NoteBlockProps).noteType].textClass
+              )}>
                 {(props as NoteBlockProps).content}
               </div>
             </div>
@@ -709,7 +827,16 @@ export function ContentBlock(props: ContentBlockProps) {
             </div>
           )}
 
-          {/* Children */}
+          {props.type === "Media" && (
+            <MediaBlock
+              url={(props as MediaBlockProps).url}
+              mediaType={(props as MediaBlockProps).mediaType}
+              aspectRatio={(props as MediaBlockProps).aspectRatio}
+              autoPlay={(props as MediaBlockProps).autoPlay}
+              controls={(props as MediaBlockProps).controls} type={"Media"} title={""} />
+          )}
+
+          {/* Children content */}
           {props.children && (
             <div className="mt-8 space-y-6">
               {props.children}
@@ -719,7 +846,7 @@ export function ContentBlock(props: ContentBlockProps) {
 
         {/* Footer */}
         {props.footer && (
-          <div className="mt-8 pt-4 border-t border-border">
+          <div className="mt-8 pt-4 border-t">
             {props.footer}
           </div>
         )}
@@ -761,3 +888,5 @@ export class ErrorBoundary extends React.Component<
     return this.props.children;
   }
 }
+
+

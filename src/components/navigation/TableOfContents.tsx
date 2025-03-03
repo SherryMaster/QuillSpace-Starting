@@ -4,6 +4,8 @@ import { ExpandedContext } from "@/contexts/ExpandedContext";
 import { useMobileMenu } from "@/contexts/MobileMenuContext";
 import { cn } from "@/utils/common";
 import * as lucideIcons from 'lucide-react';
+import { MediaType } from "@/types/media";
+import { mediaTypeConfig } from '@/components/contentblock/ContentBlock';
 
 interface TOCItem {
   id: string;
@@ -55,6 +57,56 @@ const getBlockDepth = (element: Element): number => {
     current = current.parentElement;
   }
   return depth;
+};
+
+const getBlockIcon = (type: string, mediaType?: MediaType): LucideIcon => {
+  if (type === "Media" && mediaType) {
+    return mediaTypeConfig[mediaType].icon;
+  }
+
+  // Default icons for other block types
+  switch (type) {
+    case "Classic":
+      return lucideIcons.Layout;
+    case "Generic":
+      return lucideIcons.Box;
+    case "Note":
+      return lucideIcons.AlertCircle;
+    case "FileStructureView":
+      return lucideIcons.FolderTree;
+    case "Challenge":
+      return lucideIcons.Target;
+    case "Code":
+      return lucideIcons.Code;
+    case "Markdown":
+      return lucideIcons.FileText;
+    default:
+      return lucideIcons.Box;
+  }
+};
+
+const getBlockColor = (type: string, mediaType?: MediaType): string => {
+  if (type === "Media" && mediaType) {
+    const colorClass = mediaTypeConfig[mediaType].badgeClass.split(' ')[1];
+    return colorClass;
+  }
+  
+  switch (type) {
+    case "Classic":
+    case "Generic":
+    case "Markdown":
+      return "text-gray-500";
+    case "Note":
+      return "text-blue-500";
+    case "FileStructureView":
+      return "text-green-500";
+    case "Challenge":
+      return "text-blue-500";
+    case "Code":
+      return "text-cyan-500";
+    default:
+      return "text-gray-500";
+  }
 };
 
 export function TableOfContents({ className }: TableOfContentsProps) {
@@ -455,16 +507,38 @@ export function TableOfContents({ className }: TableOfContentsProps) {
     const isPrimaryActive = activeId === item.id;
     const isSecondaryActive = secondaryActiveIds.has(item.id);
     
+    // Get the appropriate icon component
     const IconComponent = (lucideIcons[capitalizeFirstLetter(item.iconName) as keyof typeof lucideIcons] || Box) as LucideIcon;
+
+    // Determine icon color class based on block type and media type
+    const getIconColorClass = () => {
+      if (item.type === "Media") {
+        // Extract media type from iconName (e.g., "Film" -> "Video")
+        const mediaTypeMap: Record<string, MediaType> = {
+          'Film': 'Video',
+          'Music': 'Audio',
+          'Image': 'Image',
+          'Play': 'GIF'
+        };
+        const mediaType = mediaTypeMap[item.iconName] as MediaType;
+        if (mediaType) {
+          return mediaTypeConfig[mediaType].badgeClass.split(' ')[1]; // This will get the color class
+        }
+      }
+      return item.iconColor;
+    };
 
     return (
       <li key={item.id} className="mt-2">
-        <div className="flex items-start gap-2"> {/* Changed from items-center to items-start */}
-          <div className="flex-none pt-1"> {/* Added pt-1 for better alignment with wrapped text */}
+        <div className="flex items-start gap-2">
+          <div className="flex-none pt-1">
             {hasChildren ? (
               <button
                 onClick={(e) => toggleItem(item.id, e)}
-                className="p-1 hover:bg-accent/50 rounded"
+                className={cn(
+                  "p-0.5 hover:bg-accent rounded-sm transition-colors",
+                  getIconColorClass() // Apply the color class here
+                )}
               >
                 {isExpanded ? (
                   <ChevronDown className="h-4 w-4" />
@@ -473,7 +547,7 @@ export function TableOfContents({ className }: TableOfContentsProps) {
                 )}
               </button>
             ) : (
-              <div className="w-6" />
+              <div className="w-5" /> // Spacing for items without children
             )}
           </div>
           <button
@@ -488,8 +562,13 @@ export function TableOfContents({ className }: TableOfContentsProps) {
             )}
           >
             <div className="flex items-center gap-2">
-              <IconComponent className={`flex-none h-4 w-4 ${item.iconColor}`} />
-              <span className="line-clamp-2 break-words">{item.title}</span> {/* Added line-clamp-2 */}
+            <IconComponent 
+              className={cn(
+                "flex-none h-4 w-4 mt-0.5",
+                getIconColorClass() // Apply the color class to the icon
+              )} 
+            />
+            <span className="line-clamp-2 break-words">{item.title}</span>
             </div>
           </button>
         </div>

@@ -350,6 +350,43 @@
     @apply content-[''] absolute top-0 right-0 h-full w-[100px]
            bg-gradient-to-r from-transparent to-primary/80;
   }
+
+  /* Media block animations */
+  .animate-pulse-video {
+    @apply animate-pulse bg-purple-500/10;
+  }
+
+  .animate-wave {
+    @apply relative overflow-hidden;
+    &::after {
+      content: '';
+      @apply absolute inset-0 bg-blue-500/10;
+      animation: wave 1.5s infinite;
+    }
+  }
+
+  @keyframes wave {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* Media block theme variations */
+  .media-block-video {
+    @apply border-purple-500/20 bg-purple-500/5;
+  }
+
+  .media-block-audio {
+    @apply border-blue-500/20 bg-blue-500/5;
+  }
+
+  .media-block-image {
+    @apply border-green-500/20 bg-green-500/5;
+  }
+
+  .media-block-gif {
+    @apply border-yellow-500/20 bg-yellow-500/5;
+  }
 }
 
   /* Add text truncation utilities */
