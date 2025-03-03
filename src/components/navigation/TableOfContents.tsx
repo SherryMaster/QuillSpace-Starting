@@ -22,6 +22,41 @@ const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
+// Add this utility function at the top of the file
+const isElementInMiddleOfViewport = (element: Element): number => {
+  const rect = element.getBoundingClientRect();
+  const windowHeight = window.innerHeight;
+  const elementCenter = rect.top + (rect.height / 2);
+  const viewportCenter = windowHeight / 2;
+  
+  // Return the absolute distance from the viewport center
+  return Math.abs(elementCenter - viewportCenter);
+};
+
+// New helper function to check if element intersects with middle zone
+const intersectsMiddleZone = (rect: DOMRect): boolean => {
+  const windowHeight = window.innerHeight;
+  const middleZoneSize = windowHeight * 0.1; // 10% of viewport height
+  const middleZoneTop = (windowHeight / 2) - (middleZoneSize / 2);
+  const middleZoneBottom = middleZoneTop + middleZoneSize;
+
+  // Check if the element intersects with the middle zone
+  return rect.bottom > middleZoneTop && rect.top < middleZoneBottom;
+};
+
+// New helper function to get block depth
+const getBlockDepth = (element: Element): number => {
+  let depth = 0;
+  let current = element;
+  while (current.parentElement) {
+    if (current.parentElement.classList.contains('content-block')) {
+      depth++;
+    }
+    current = current.parentElement;
+  }
+  return depth;
+};
+
 export function TableOfContents({ className }: TableOfContentsProps) {
   const [tocItems, setTocItems] = useState<TOCItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -284,60 +319,135 @@ export function TableOfContents({ className }: TableOfContentsProps) {
 
   // Add Intersection Observer to track visible sections
   useEffect(() => {
-    const visibleSections = new Set<string>();
-    let primarySection: string | null = null;
+    let activeElements = new Map<string, { distance: number; depth: number; rect: DOMRect }>();
+    let visibleElements = new Map<string, { rect: DOMRect; depth: number }>();
+  
+    const updateActiveSection = () => {
+      // Get all sections that are at least partially visible
+      const sections = Array.from(document.querySelectorAll('.content-block'));
+      
+      // Reset maps
+      activeElements.clear();
+      visibleElements.clear();
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const targetId = entry.target.id;
+      // First pass: collect all visible sections
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        const buffer = window.innerHeight * 0.1;
+        
+        // If section is visible at all, add to visibleElements
+        if (rect.top < (window.innerHeight + buffer) && rect.bottom > -buffer) {
+          const depth = getBlockDepth(section);
+          visibleElements.set(section.id, { rect, depth });
+          
+          // If section intersects middle zone, add to activeElements
+          if (intersectsMiddleZone(rect)) {
+            const distance = isElementInMiddleOfViewport(section);
+            activeElements.set(section.id, { distance, depth, rect });
+          }
+        }
+      });
 
-          if (entry.isIntersecting) {
-            visibleSections.add(targetId);
-            
-            // If this section is more than 50% visible, make it primary
-            if (entry.intersectionRatio >= 0.5) {
-              primarySection = targetId;
-            }
-          } else {
-            visibleSections.delete(targetId);
+      // Find the section closest to the middle from activeElements
+      let closestSection: string | null = null;
+      let minDistance = Infinity;
+      let maxDepth = -1;
+
+      activeElements.forEach(({ distance, depth }, id) => {
+        if (depth > maxDepth) {
+          closestSection = id;
+          minDistance = distance;
+          maxDepth = depth;
+        } 
+        else if (depth === maxDepth && distance < minDistance) {
+          closestSection = id;
+          minDistance = distance;
+        }
+      });
+
+      if (closestSection) {
+        setActiveId(closestSection);
+        
+        // Set all visible blocks as secondary
+        const secondaryIds = new Set<string>();
+        
+        const isSubstantiallyVisible = (rect: DOMRect) => {
+          const visibleThreshold = rect.height * 0.3;
+          const visibleTop = Math.max(0, rect.top);
+          const visibleBottom = Math.min(window.innerHeight, rect.bottom);
+          const visibleHeight = visibleBottom - visibleTop;
+          return visibleHeight >= visibleThreshold;
+        };
+
+        // Add ALL visible blocks as secondary (except the active one)
+        visibleElements.forEach(({ rect }, id) => {
+          if (id !== closestSection && isSubstantiallyVisible(rect)) {
+            secondaryIds.add(id);
           }
         });
 
-        // Update primary active section
-        if (primarySection) {
-          setActiveId(primarySection);
-          
-          // Expand TOC for primary section
-          const parentIds = getParentPath(tocItems, primarySection);
-          setExpandedItems(prev => {
-            const newSet = new Set(prev);
-            parentIds.forEach(id => newSet.add(id));
-            if (primarySection) {
-              newSet.add(primarySection);
+        // Add parent blocks for all visible sections
+        const addParentBlocks = (blockId: string) => {
+          const parentIds = getParentPath(tocItems, blockId);
+          parentIds.forEach(parentId => {
+            if (visibleElements.has(parentId)) {
+              secondaryIds.add(parentId);
             }
-            return newSet;
           });
-        }
+        };
 
-        // Update secondary active sections (excluding primary)
-        setSecondaryActiveIds(new Set(
-          Array.from(visibleSections).filter(id => id !== primarySection)
-        ));
-      },
-      {
-        threshold: [0, 0.5, 1.0], // Track different visibility thresholds
-        rootMargin: '-10% 0px -10% 0px' // Slightly reduced margin for better accuracy
+        // Add parents for all visible blocks
+        visibleElements.forEach((_, id) => addParentBlocks(id));
+
+        setSecondaryActiveIds(secondaryIds);
+
+        // Update expanded items
+        const parentIds = getParentPath(tocItems, closestSection);
+        setExpandedItems(prev => {
+          const newSet = new Set(prev);
+          parentIds.forEach(id => newSet.add(id));
+          newSet.add(closestSection!);
+          return newSet;
+        });
+      } else {
+        setActiveId('');
+        setSecondaryActiveIds(new Set());
       }
-    );
+    };
 
-    // Observe all content blocks
-    document.querySelectorAll('.content-block').forEach((section) => {
-      observer.observe(section);
-    });
+    // Debounced scroll handler
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(updateActiveSection, 50);
+    };
 
-    return () => observer.disconnect();
-  }, [tocItems]); // Add tocItems as dependency since we use it in the callback
+    // Handle rapid scrolling with requestAnimationFrame
+    let ticking = false;
+    const handleRapidScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateActiveSection();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Initial update
+    updateActiveSection();
+
+    // Add event listeners
+    window.addEventListener('scroll', handleRapidScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('scroll', handleRapidScroll);
+      window.removeEventListener('resize', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [tocItems]); // Only re-run if tocItems changes
 
   const renderTOCItem = (item: TOCItem) => {
     const hasChildren = item.children.length > 0;
