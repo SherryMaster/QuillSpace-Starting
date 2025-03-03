@@ -3,15 +3,16 @@ import { Menu } from 'lucide-react';
 import { ThemeToggle } from '@/theme/ThemeToggle';
 import { useMobileMenu } from '@/contexts/MobileMenuContext';
 import { cn } from '@/utils/common';
+import { useScrollProgress } from '@/hooks/useScrollProgress';
 
 interface FloatingNavbarProps {
-  // Remove title if it's not being used
-  // title?: string;
+  className?: string;
 }
 
-export function FloatingNavbar({}: FloatingNavbarProps) {
+export function FloatingNavbar({ className }: FloatingNavbarProps) {
   const [isVisible, setIsVisible] = useState(false);
   const { toggle } = useMobileMenu();
+  const progress = useScrollProgress();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,12 +30,14 @@ export function FloatingNavbar({}: FloatingNavbarProps) {
     <nav
       className={cn(
         'fixed top-0 left-0 right-0 z-50',
-        'bg-background border-b',
+        'bg-background/95 backdrop-blur-sm border-b',
         'transition-transform duration-300 ease-in-out',
-        isVisible ? 'translate-y-0' : '-translate-y-full'
+        isVisible ? 'translate-y-0' : '-translate-y-full',
+        className
       )}
     >
-      <div className="container-base">
+      {/* Main navbar content */}
+      <div className="container-base relative">
         <div className="h-16 flex items-center justify-between">
           <button
             onClick={toggle}
@@ -47,6 +50,35 @@ export function FloatingNavbar({}: FloatingNavbarProps) {
           <div className="flex items-center gap-4 ml-auto">
             <ThemeToggle />
           </div>
+        </div>
+
+        {/* Progress bar */}
+        <div 
+          className="absolute bottom-0 left-0 w-full h-[2px] bg-muted/20"
+          role="presentation"
+        >
+          <div 
+            className={cn(
+              "h-full bg-primary/80",
+              "relative",
+              // Gradient effect on the progress bar
+              "after:absolute after:top-0 after:right-0",
+              "after:h-full after:w-[100px]",
+              "after:bg-gradient-to-r after:from-transparent after:to-primary/80",
+              // Subtle glow effect
+              "before:absolute before:inset-0",
+              "before:bg-primary/20 before:blur-sm",
+              // Smooth transition
+              "transition-all duration-150 ease-out"
+            )}
+            style={{ 
+              width: `${progress}%`,
+            }}
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          />
         </div>
       </div>
     </nav>

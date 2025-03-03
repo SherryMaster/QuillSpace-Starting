@@ -52,7 +52,7 @@ export function CodeHighlighter({ code, extension }: CodeHighlighterProps) {
     >
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
         <pre
-          className={`${className} p-4 overflow-x-auto`}
+          className={`${className} p-4 overflow-x-auto custom-scrollbar`}
           style={{ ...style, background: "#011627" }}
         >
           {tokens.map((line, i) => (

@@ -455,41 +455,47 @@ export function TableOfContents({ className }: TableOfContentsProps) {
     const isPrimaryActive = activeId === item.id;
     const isSecondaryActive = secondaryActiveIds.has(item.id);
     
-    // Import all icons at the top of the file
     const IconComponent = (lucideIcons[capitalizeFirstLetter(item.iconName) as keyof typeof lucideIcons] || Box) as LucideIcon;
 
     return (
       <li key={item.id} className="mt-2">
-        <div className="flex items-center gap-2">
-          {hasChildren && (
-            <button
-              onClick={(e) => toggleItem(item.id, e)}
-              className="p-1 hover:bg-accent/50 rounded"
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </button>
-          )}
-          {!hasChildren && <div className="w-6" />}
+        <div className="flex items-start gap-2"> {/* Changed from items-center to items-start */}
+          <div className="flex-none pt-1"> {/* Added pt-1 for better alignment with wrapped text */}
+            {hasChildren ? (
+              <button
+                onClick={(e) => toggleItem(item.id, e)}
+                className="p-1 hover:bg-accent/50 rounded"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+            ) : (
+              <div className="w-6" />
+            )}
+          </div>
           <button
             onClick={(e) => scrollToItem(item.id, e)}
             className={cn(
-              "flex-grow text-left text-sm transition-colors duration-200 flex items-center gap-2",
+              "flex-grow text-left text-sm transition-colors duration-200",
+              "min-w-0", // Allow text to shrink
+              "break-words", // Allow word breaking
               isPrimaryActive && "text-accent font-medium",
               isSecondaryActive && "text-accent/70",
               !isPrimaryActive && !isSecondaryActive && "text-muted-foreground hover:text-foreground"
             )}
           >
-            <IconComponent className={`h-4 w-4 ${item.iconColor}`} />
-            <span>{item.title}</span>
+            <div className="flex items-center gap-2">
+              <IconComponent className={`flex-none h-4 w-4 ${item.iconColor}`} />
+              <span className="line-clamp-2 break-words">{item.title}</span> {/* Added line-clamp-2 */}
+            </div>
           </button>
         </div>
         
         {hasChildren && isExpanded && (
-          <ul className="ml-4 border-l border-border/20 pl-2">
+          <ul className="ml-4 border-l border-border/20 pl-2 mt-2">
             {item.children.map(renderTOCItem)}
           </ul>
         )}
@@ -499,19 +505,15 @@ export function TableOfContents({ className }: TableOfContentsProps) {
 
   return (
     <nav className={cn(
-      // Base styles
       'toc-container rounded-lg border bg-card/50 p-4 backdrop-blur-sm',
-      'flex flex-col', // Add flex container
-      
-      // Mobile styles
-      'fixed inset-y-0 left-0 w-[80vw] max-w-[350px] rounded-none border-r z-50',
+      'flex flex-col',
+      // Mobile styles (fixed full height)
+      'fixed inset-y-0 left-0 w-[85vw] max-w-[400px] rounded-none border-r z-50', // Increased width
       isOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : '-translate-x-full opacity-0 pointer-events-none',
-      
-      // Desktop styles
-      'lg:sticky lg:top-20 lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto lg:w-full lg:max-w-none',
-      'lg:h-[calc(100vh-8rem)]', // Fixed height for desktop
-      
-      // Transitions
+      // Desktop styles (sticky positioning)
+      'lg:relative lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto lg:w-[320px] lg:min-w-[320px] lg:inset-auto', // Increased width and added min-width
+      'lg:sticky lg:top-20', // top-20 should match your navbar height + desired spacing
+      'lg:max-h-[calc(100vh-5rem)]', // Adjust based on your navbar height
       'transition-all duration-300 ease-in-out',
       className
     )}>
@@ -531,35 +533,16 @@ export function TableOfContents({ className }: TableOfContentsProps) {
             </button>
           </div>
           
-          {/* Search Section */}
-          <div className="relative">
+          {/* Search input with proper width */}
+          <div className="relative w-full">
             <input
               type="text"
               placeholder="Search contents..."
-              className="w-full px-3 py-2 text-sm bg-background/50 border rounded-md pr-8"
+              className="w-full px-3 py-2 rounded-md bg-background/50 border"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Clear search"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
           </div>
-
-          {/* Search Results Count */}
-          {isSearching && (
-            <div className="text-sm text-muted-foreground">
-              {filteredItems.length === 0 
-                ? 'No matches found' 
-                : `Found ${filteredItems.length} match${filteredItems.length > 1 ? 'es' : ''}`
-              }
-            </div>
-          )}
         </div>
       </div>
 

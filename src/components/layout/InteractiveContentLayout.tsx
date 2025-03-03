@@ -5,6 +5,7 @@ import { ExpandedProvider } from "@/contexts/ExpandedContext";
 import { MobileMenuProvider, useMobileMenu } from "@/contexts/MobileMenuContext";
 import { cn } from "@/utils/common";
 import { FloatingNavbar } from './FloatingNavbar';
+// import { ScrollProgress } from "@/components/navigation/ScrollProgress";
 
 export type ColorVariant = 
   | "blue"
