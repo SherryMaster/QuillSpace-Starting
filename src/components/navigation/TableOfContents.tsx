@@ -482,9 +482,9 @@ export function TableOfContents({ className }: TableOfContentsProps) {
               "flex-grow text-left text-sm transition-colors duration-200",
               "min-w-0", // Allow text to shrink
               "break-words", // Allow word breaking
-              isPrimaryActive && "text-accent font-medium",
-              isSecondaryActive && "text-accent/70",
-              !isPrimaryActive && !isSecondaryActive && "text-muted-foreground hover:text-foreground"
+              isPrimaryActive && "text-accent font-medium hover:text-accent/90 hover:bg-accent/10", // Enhanced hover effect
+              isSecondaryActive && "text-accent/70 hover:text-accent/80 hover:bg-accent/10", // Enhanced hover effect
+              !isPrimaryActive && !isSecondaryActive && "text-muted-foreground hover:text-foreground hover:bg-foreground/10"
             )}
           >
             <div className="flex items-center gap-2">
