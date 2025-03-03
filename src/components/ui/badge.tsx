@@ -1,22 +1,22 @@
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/utils/common"
+import { ColorToken } from '@/types/colors'
+import { getColorClass } from '@/utils/colors'
+
+interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'outline'
+  color?: ColorToken
+}
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-auto",
+  "inline-flex items-center justify-center rounded-md px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 [&>svg]:size-3.5 gap-1.5",
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
-        destructive:
-          "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
-        outline:
-          "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        default: "border-transparent bg-primary/10 text-primary hover:bg-primary/20",
+        outline: "border-2 bg-background hover:bg-accent",
+        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
       },
     },
     defaultVariants: {
@@ -25,19 +25,24 @@ const badgeVariants = cva(
   }
 )
 
-function Badge({
+const Badge = ({
+  variant = 'default',
+  color,
   className,
-  variant,
-  asChild = false,
   ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "span"
+}: BadgeProps) => {
+  const colorClasses = color ? {
+    'default': `bg-${color}/10 text-${color} hover:bg-${color}/20`,
+    'outline': `border-${color}/20 text-${color} hover:bg-${color}/10`,
+  }[variant] : '';
 
   return (
-    <Comp
-      data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
+    <div
+      className={cn(
+        badgeVariants({ variant }),
+        colorClasses,
+        className
+      )}
       {...props}
     />
   )

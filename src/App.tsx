@@ -1,3 +1,4 @@
+import { Bolt, Clock, CloudLightning, CloudLightningIcon, Lightbulb, Radar, RectangleHorizontal, Square, SquarePower, ThumbsDown } from 'lucide-react';
 import './App.css'
 import { ContentBlock } from "./components/contentblock/ContentBlock";
 import { ThemedInteractiveContentLayout } from "./components/layout/ThemedInteractiveContentLayout";
@@ -13,11 +14,15 @@ function App() {
     >
       <ContentBlock type="Classic" title="Introduction">
         <p className="text-lg text-muted-foreground">Welcome to our comprehensive guide!</p>
-        <ContentBlock type="Generic" title="Generic Block">
-        <p>This is a generic block.</p>
+        <ContentBlock 
+          type="Generic" 
+          title="Generic Block" 
+        >
+          <p>This is a generic block.</p>
         </ContentBlock>
 
-        <ContentBlock type="Note" title="Important Note" noteType="primary" content="This is a primary note.">
+        <ContentBlock type="Note" title="Important Note" noteType="warning" content="This is a primary note.">
+          <p>This is a note with a custom icon.</p>
         </ContentBlock>
 
         <ContentBlock type="FileStructureView" title="Project Structure" filestructure={{
@@ -31,7 +36,7 @@ function App() {
           "public": {
             "index.html": "HTML template"
           }
-        }} />
+        }}/>
 
         <ContentBlock type="Challenge" title="Coding Challenge" challengeType="Exercise" difficulty="Intermediate">
           <p>Complete this coding exercise.</p>

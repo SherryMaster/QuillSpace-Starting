@@ -1,5 +1,4 @@
-import React from 'react';
-import { ReactNode, useState, useId, useRef, useEffect, isValidElement, useContext } from "react";
+import React, { ReactNode, useState, useId, useRef, useEffect, isValidElement, useContext, createElement } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText,
@@ -16,29 +15,35 @@ import {
   Target,
   Clock,
   Code,
-  Book,
-  AlertOctagon
+  AlertOctagon,
+  LucideIcon,
+  Info,
+  HelpCircle,
+  InfoIcon
 } from "lucide-react";
 import { FileStructureView } from './FileStructureView';
 import { CodeHighlighter } from "./CodeHighlighter";
 import { ExpandedContext } from "@/contexts/ExpandedContext";
 import { MarkdownBlock } from './MarkdownBlock';
+import { IconProps, isValidLucideIcon } from '@/utils/iconUtils';
+import { cn } from '@/utils/common';
+import { type ColorToken } from '@/types/colors';
+import { getColorClass } from '@/utils/colors';
 
-type ColorVariant =
-  | "gray"
-  | "red"
-  | "yellow"
-  | "green"
-  | "blue"
-  | "purple"
-  | "cyan"
-  | "primary";
+export interface IconConfig {
+  icon?: LucideIcon;
+  size?: number;
+  color?: ColorToken;
+  ariaLabel?: string;
+  className?: string;
+}
 
 interface BlockConfig {
-  icon: any;
+  icon: LucideIcon;
   containerClass: string;
   badgeClass: string;
   contentClass: string;
+  iconProps?: Partial<IconProps>;
 }
 
 interface FeatureStats {
@@ -51,14 +56,20 @@ interface FeatureStats {
   }[];
 }
 
-// Base interface for all blocks (formerly Chapter)
-interface ClassicBlockProps {
+// Enhanced base interface
+interface BaseBlockProps {
   title: string;
-  subtitle?: string; // New subtitle prop
+  subtitle?: string;
   description?: ReactNode;
   children?: ReactNode;
   footer?: ReactNode;
   showOnTOC?: boolean;
+  iconConfig?: IconConfig;
+  className?: string;
+}
+
+// Update ClassicBlockProps
+interface ClassicBlockProps extends BaseBlockProps {
   type: "Classic";
   features?: boolean;
   parentId?: string;
@@ -67,184 +78,218 @@ interface ClassicBlockProps {
 // Generic extends Classic with color options
 interface GenericBlockProps extends Omit<ClassicBlockProps, "type"> {
   type: "Generic";
-  color?: ColorVariant;
+  color?: ColorToken;
 }
 
 // All other blocks extend Generic
-interface NoteBlockProps extends Omit<GenericBlockProps, "type" | "color"> {
+interface NoteBlockProps extends BaseBlockProps {
   type: "Note";
   noteType: "primary" | "secondary" | "info" | "warning" | "critical";
   content?: ReactNode;
 }
 
-interface FileStructureBlockProps extends Omit<GenericBlockProps, "type" | "color"> {
+interface FileStructureBlockProps extends BaseBlockProps {
   type: "FileStructureView";
   filestructure: Record<string, any>;
 }
 
-interface ChallengeBlockProps extends Omit<GenericBlockProps, "type" | "color"> {
+interface ChallengeBlockProps extends BaseBlockProps {
   type: "Challenge";
   difficulty: "Beginner" | "Intermediate" | "Advanced";
-  challengeType: "Exercise" | "Project";  // New field to distinguish between types
-  tech?: string[];  // Optional tech stack, renamed from projectTech
-  estimatedTime?: string;  // Optional estimated time
+  challengeType: "Exercise" | "Project";
+  tech?: string[];
+  estimatedTime?: string;
   id?: string;
 }
 
-// Removed ProjectBlockProps interface
-// interface ProjectBlockProps extends Omit<GenericBlockProps, "type" | "color"> {
-//   type: "Project";
-//   difficulty: "Beginner" | "Intermediate" | "Advanced";
-//   projectTech: string[];
-//   estimatedTime: string;
-//   id?: string;
-// }
-
-// Removed PhaseBlockProps
-
-interface CodeBlockProps extends Omit<GenericBlockProps, "type" | "color"> {
+interface CodeBlockProps extends BaseBlockProps {
   type: "Code";
   code: string;
   extension: string;
 }
 
-interface MarkdownBlockProps extends Omit<GenericBlockProps, "type" | "color"> {
+interface MarkdownBlockProps extends BaseBlockProps {
   type: "Markdown";
   content: string;
 }
 
 export type ContentBlockProps = 
-  | ClassicBlockProps
-  | GenericBlockProps
-  | NoteBlockProps 
+  | ClassicBlockProps 
+  | GenericBlockProps 
+  | NoteBlockProps        // Make sure this is included
   | FileStructureBlockProps 
   | ChallengeBlockProps 
-  | CodeBlockProps
+  | CodeBlockProps 
   | MarkdownBlockProps;  // Removed ProjectBlockProps
 
+const DEFAULT_BLOCK_ICONS: Record<ContentBlockProps["type"], LucideIcon | ((props: ContentBlockProps) => LucideIcon)> = {
+  Classic: Layout,
+  Generic: Box,
+  Note: (props: ContentBlockProps) => {
+    if (props.type === "Note") {
+      return noteTypeConfig[(props as NoteBlockProps).noteType].icon;
+    }
+    return AlertCircle;
+  },
+  FileStructureView: FolderTree,
+  Challenge: (props: ContentBlockProps) => {
+    if (props.type === "Challenge") {
+      const challengeProps = props as ChallengeBlockProps;
+      return challengeProps.challengeType === "Project" ? Rocket : Target;
+    }
+    return Target;
+  },
+  Code: Code,
+  Markdown: FileText
+};
+
+const getBlockIcon = (props: ContentBlockProps): LucideIcon => {
+  // First check for custom icon in iconConfig
+  if (props.iconConfig?.icon) {
+    return props.iconConfig.icon;
+  }
+
+  const defaultIcon = DEFAULT_BLOCK_ICONS[props.type];
+
+  // Handle function-based icons
+  if (typeof defaultIcon === 'function') {
+    const iconResult: LucideIcon = defaultIcon(props) as LucideIcon;
+    return iconResult;
+  }
+
+  // At this point, TypeScript knows defaultIcon must be LucideIcon
+  return defaultIcon as LucideIcon;
+};
+
 const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
+  const icon = getBlockIcon(props);
+  
   const blockConfigs: Record<ContentBlockProps["type"], BlockConfig> = {
     Classic: {
-      icon: Layout,
-      containerClass: "border-gray-500/20 bg-gray-500/5",
-      badgeClass: "bg-gray-500/10 text-gray-500",
-      contentClass: "bg-gray-500/5"
+      icon,
+      containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
+      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
+      contentClass: getColorClass('gray-500', 'bg', 5),
+      iconProps: {
+        size: props.iconConfig?.size || 20,
+        className: cn(
+          "w-5 h-5",
+          props.iconConfig?.color && getColorClass(props.iconConfig.color, 'text'),
+          props.iconConfig?.className
+        )
+      }
     },
     Generic: {
-      icon: Box,
-      containerClass: "border-gray-500/20 bg-gray-500/5",
-      badgeClass: "bg-gray-500/10 text-gray-500",
-      contentClass: "bg-gray-500/5"
+      icon,
+      containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
+      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
+      contentClass: getColorClass('gray-500', 'bg', 5)
     },
     Note: {
-      icon: AlertCircle, // This will be overridden for specific note types
-      containerClass: "border-blue-500/20 bg-blue-500/5",
-      badgeClass: "bg-blue-500/10 text-blue-500",
-      contentClass: "bg-blue-500/5"
+      icon,
+      containerClass: getColorClass('blue-500', 'border', 20) + ' ' + getColorClass('blue-500', 'bg', 5),
+      badgeClass: getColorClass('blue-500', 'bg', 10) + ' ' + getColorClass('blue-500', 'text'),
+      contentClass: getColorClass('blue-500', 'bg', 5)
     },
     FileStructureView: {
-      icon: FolderTree,
-      containerClass: "border-green-500/20 bg-green-500/5",
-      badgeClass: "bg-green-500/10 text-green-500",
-      contentClass: "bg-green-500/5"
+      icon,
+      containerClass: getColorClass('green-500', 'border', 20) + ' ' + getColorClass('green-500', 'bg', 5),
+      badgeClass: getColorClass('green-500', 'bg', 10) + ' ' + getColorClass('green-500', 'text'),
+      contentClass: getColorClass('green-500', 'bg', 5)
     },
     Challenge: {
-      icon: Target,
-      containerClass: "border-blue-500/20 bg-blue-500/5",
-      badgeClass: "bg-blue-500/10 text-blue-500",
-      contentClass: "bg-blue-500/5"
+      icon,
+      containerClass: getColorClass('blue-500', 'border', 20) + ' ' + getColorClass('blue-500', 'bg', 5),
+      badgeClass: getColorClass('blue-500', 'bg', 10) + ' ' + getColorClass('blue-500', 'text'),
+      contentClass: getColorClass('blue-500', 'bg', 5)
     },
     Code: {
-      icon: Code,
-      containerClass: "border-cyan-500/20 bg-cyan-500/5",
-      badgeClass: "bg-cyan-500/10 text-cyan-500",
-      contentClass: "bg-cyan-500/5"
+      icon,
+      containerClass: getColorClass('cyan-500', 'border', 20) + ' ' + getColorClass('cyan-500', 'bg', 5),
+      badgeClass: getColorClass('cyan-500', 'bg', 10) + ' ' + getColorClass('cyan-500', 'text'),
+      contentClass: getColorClass('cyan-500', 'bg', 5)
     },
     Markdown: {
-      icon: FileText,
-      containerClass: "border-gray-500/20 bg-gray-500/5",
-      badgeClass: "bg-gray-500/10 text-gray-500",
-      contentClass: "bg-gray-500/5"
+      icon,
+      containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
+      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
+      contentClass: getColorClass('gray-500', 'bg', 5)
     }
   };
 
-  // Special handling for Note blocks based on noteType
-  if (props.type === "Note") {
-    const noteProps = props as NoteBlockProps;
-    const noteConfig = noteTypeConfig[noteProps.noteType];
-    return {
-      ...blockConfigs.Note,
-      icon: noteConfig.icon,
-      containerClass: noteConfig.containerClass,
-      badgeClass: `${noteConfig.bgClass} ${noteConfig.textClass}`,
-      contentClass: noteConfig.bgClass
-    };
-  }
+  let config = { ...blockConfigs[props.type] };
 
-  // Special handling for Challenge blocks based on challengeType
+  // Special case handling for Challenge type
   if (props.type === "Challenge") {
     const challengeProps = props as ChallengeBlockProps;
-    return {
-      ...blockConfigs.Challenge,
-      icon: challengeProps.challengeType === "Project" ? Rocket : Target,
+    config = {
+      ...config,
+      icon: getBlockIcon(props),
       containerClass: challengeProps.challengeType === "Project" 
-        ? "border-purple-500/20 bg-purple-500/5"
-        : "border-blue-500/20 bg-blue-500/5",
+        ? "border-2 border-purple-500/20 bg-purple-500/5"
+        : "border-2 border-blue-500/20 bg-blue-500/5",
       badgeClass: challengeProps.challengeType === "Project"
         ? "bg-purple-500/10 text-purple-500"
         : "bg-blue-500/10 text-blue-500"
     };
   }
 
-  // For Generic blocks, maintain the same icon but allow color customization
-  if (props.type === "Generic" && props.color) {
-    return {
-      ...blockConfigs.Generic,
-      containerClass: `border-${props.color}-500/20 bg-${props.color}-500/5`,
-      badgeClass: `bg-${props.color}-500/10 text-${props.color}-500`,
-      contentClass: `bg-${props.color}-500/5`
+  // Handle Generic block with custom color
+  if (props.type === "Generic" && (props as GenericBlockProps).color) {
+    const color = (props as GenericBlockProps).color;
+    config = {
+      ...config,
+      containerClass: `border-${color}/20 bg-${color}/5`,
+      badgeClass: `bg-${color}/10 text-${color}`,
+      contentClass: `bg-${color}/5`
     };
   }
 
-  return blockConfigs[props.type];
+  return config;
 };
 
-const noteTypeConfig = {
+const noteTypeConfig: Record<NoteBlockProps['noteType'], {
+  containerClass: string;
+  textClass: string;
+  bgClass: string;
+  iconClass: string;
+  icon: LucideIcon;
+}> = {
   primary: {
-    containerClass: "border-blue-600/20 bg-blue-600/5",
+    containerClass: "border-blue-500/20 bg-blue-500/5",
     textClass: "text-blue-700 dark:text-blue-300",
     bgClass: "bg-blue-500/10",
     iconClass: "text-blue-500",
-    icon: Book,
+    icon: InfoIcon
   },
   secondary: {
     containerClass: "border-gray-500/20 bg-gray-500/5",
     textClass: "text-gray-700 dark:text-gray-300",
     bgClass: "bg-gray-500/10",
     iconClass: "text-gray-500",
-    icon: FileText,
+    icon: HelpCircle
   },
   info: {
     containerClass: "border-cyan-500/20 bg-cyan-500/5",
     textClass: "text-cyan-700 dark:text-cyan-300",
     bgClass: "bg-cyan-500/10",
     iconClass: "text-cyan-500",
-    icon: AlertCircle,
+    icon: Info
   },
   warning: {
     containerClass: "border-yellow-500/20 bg-yellow-500/5",
     textClass: "text-yellow-700 dark:text-yellow-300",
     bgClass: "bg-yellow-500/10",
     iconClass: "text-yellow-500",
-    icon: AlertTriangle,
+    icon: AlertTriangle
   },
   critical: {
     containerClass: "border-red-500/20 bg-red-500/5",
     textClass: "text-red-700 dark:text-red-300",
     bgClass: "bg-red-500/10",
     iconClass: "text-red-500",
-    icon: AlertOctagon,
-  },
+    icon: AlertOctagon
+  }
 };
 
 // Add a utility function to calculate feature stats
@@ -332,13 +377,13 @@ function FeatureBadge({ stats }: { stats: FeatureStats }) {
         onClick={handleClick}
       >
         {stats.challenges > 0 && (
-          <Badge variant="secondary">
+          <Badge variant="default">
             <Target className="w-3 h-3" />
             {stats.challenges} {stats.challenges === 1 ? 'Challenge' : 'Challenges'}
           </Badge>
         )}
         {stats.projects > 0 && (
-          <Badge variant="secondary">
+          <Badge variant="default">
             <Rocket className="w-3 h-3" />
             {stats.projects} {stats.projects === 1 ? 'Project' : 'Projects'}
           </Badge>
@@ -369,16 +414,6 @@ function FeatureBadge({ stats }: { stats: FeatureStats }) {
   );
 }
 
-// Add this helper function to get difficulty badge color
-const getDifficultyColor = (difficulty: string) => {
-  const colors = {
-    Beginner: "bg-green-500/10 text-green-500",
-    Intermediate: "bg-yellow-500/10 text-yellow-500",
-    Advanced: "bg-red-500/10 text-red-500"
-  };
-  return colors[difficulty as keyof typeof colors] || colors.Beginner;
-};
-
 export function ContentBlock(props: ContentBlockProps) {
   const blockId = useId();
   const [parentId, setParentId] = useState<string>('');
@@ -386,7 +421,7 @@ export function ContentBlock(props: ContentBlockProps) {
   const [isLocalExpanded, setIsLocalExpanded] = useState(true);
   const config = getBlockConfig(props);
   const showOnTOC = props.showOnTOC ?? true;
-  const features = props.features ?? false;
+  const features = props.type === "Classic" ? props.features ?? false : false;
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
@@ -445,68 +480,65 @@ export function ContentBlock(props: ContentBlockProps) {
         return (
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
-              {/* Challenge Type Badge */}
-              <Badge variant="secondary" className={`${challengeProps.challengeType === 'Project' ? 'bg-purple-500/10 text-purple-500' : 'bg-blue-500/10 text-blue-500'}`}>
+              <Badge 
+                variant="default"
+                color={challengeProps.challengeType === 'Project' ? 'purple-500' : 'blue-500'}
+              >
                 {challengeProps.challengeType === 'Project' ? (
-                  <><Rocket className="w-3 h-3 mr-1" /> Project</>
+                  <><Rocket className="w-3.5 h-3.5" /> Project</>
                 ) : (
-                  <><Target className="w-3 h-3 mr-1" /> Exercise</>
+                  <><Target className="w-3.5 h-3.5" /> Exercise</>
                 )}
               </Badge>
               
-              {/* Difficulty Badge */}
-              <Badge variant="secondary" className={getDifficultyColor(challengeProps.difficulty)}>
+              <Badge variant="default" color={
+                challengeProps.difficulty === 'Beginner' ? 'green-500' :
+                challengeProps.difficulty === 'Intermediate' ? 'yellow-500' : 'red-500'
+              }>
                 {challengeProps.difficulty}
               </Badge>
-              {/* Estimated Time Badge */}
+
               {challengeProps.estimatedTime && (
-                <Badge variant="secondary" className="bg-accent/50">
-                  <Clock className="w-3 h-3 mr-1" />
+                <Badge variant="outline" color="gray-500">
+                  <Clock className="w-3.5 h-3.5" />
                   {challengeProps.estimatedTime}
                 </Badge>
               )}
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {/* Tech Stack Badges */}
-              {challengeProps.tech && challengeProps.tech.map((tech, index) => (
-                <Badge key={index} variant="outline" className="bg-accent/50">
-                  {tech}
-                </Badge>
-              ))}
+            {challengeProps.tech && (
+              <div className="flex flex-wrap gap-2">
+                {challengeProps.tech.map((tech, index) => (
+                  <Badge key={index} variant="outline" color="gray-500">
+                    {tech}
+                  </Badge>
+                ))}
               </div>
-
+            )}
           </div>
         );
       }
       case "Note": {
-        // const noteProps = props as NoteBlockProps;
-        // const noteConfig = noteTypeConfig[noteProps.noteType];
-        // return (
-        //   <Badge variant="secondary" className={noteConfig.textClass}>
-        //       <noteConfig.icon className={`w-3 h-3 ${noteConfig.iconClass}`} />
-        //     {noteProps.noteType.charAt(0).toUpperCase() + noteProps.noteType.slice(1)}
-        //   </Badge>
-        // );
+        // Remove the badge rendering for Note type
         return null;
       }
       case "FileStructureView":
         return (
-          <Badge variant="secondary" className="bg-green-500/10 text-green-500">
+          <Badge variant="default" className="bg-green-500/10 text-green-500">
             <FolderTree className="w-3 h-3 mr-1" />
             File Structure
           </Badge>
         );
       case "Code":
         return (
-          <Badge variant="secondary" className="bg-cyan-500/10 text-cyan-500">
+          <Badge variant="default" className="bg-cyan-500/10 text-cyan-500">
             <Code className="w-3 h-3 mr-1" />
             Code
           </Badge>
         );
       case "Markdown":
         return (
-          <Badge variant="secondary" className="bg-gray-500/10 text-gray-500">
+          <Badge variant="default" className="bg-gray-500/10 text-gray-500">
             <FileText className="w-3 h-3 mr-1" />
             Markdown
           </Badge>
@@ -522,7 +554,6 @@ export function ContentBlock(props: ContentBlockProps) {
     'data-block-type': props.type,
     'data-show-toc': showOnTOC,
     'data-parent-id': parentId,
-    // Use the actual icon component name
     'data-block-icon': config.icon.displayName || config.icon.name || 'Box',
     'data-block-color': props.type === "Note" 
       ? noteTypeConfig[(props as NoteBlockProps).noteType].iconClass
@@ -530,20 +561,30 @@ export function ContentBlock(props: ContentBlockProps) {
       ? (props as ChallengeBlockProps).challengeType === "Project" 
         ? "text-purple-500"
         : "text-blue-500"
-      : props.type === "Generic" && props.color
-      ? `text-${props.color}-500`
+      : props.type === "FileStructureView"
+      ? "text-green-500"
+      : props.type === "Generic" && (props as GenericBlockProps).color
+      ? `text-${(props as GenericBlockProps).color}-500`
       : config.badgeClass.split(' ')[1],
-    className: `content-block ${
-      props.type === "Classic" 
-        ? "" 
-        : "border-2 p-6 backdrop-blur-sm rounded-lg"
-    } ${
-      props.type === "Note" 
-        ? noteTypeConfig[(props as NoteBlockProps).noteType].containerClass 
-        : props.type === "Classic"
-        ? ""
-        : config.containerClass
-    }`
+    ...(props.type === "Note" && {
+      'data-note-type': (props as NoteBlockProps).noteType,
+      'data-note-icon': noteTypeConfig[(props as NoteBlockProps).noteType].icon.name
+    }),
+    className: cn(
+      'content-block',
+      props.type !== "Classic" && "border-2 p-6 backdrop-blur-sm rounded-lg",
+      {
+        [noteTypeConfig[(props as NoteBlockProps).noteType]?.containerClass]: props.type === "Note",
+        'bg-green-500/5 border-green-500/20': props.type === "FileStructureView",
+        [config.containerClass]: props.type !== "Classic" && props.type !== "Note" && props.type !== "FileStructureView",
+        'border-purple-500/20': props.type === "Challenge" && (props as ChallengeBlockProps).challengeType === "Project",
+        'border-blue-500/20': props.type === "Challenge" && (props as ChallengeBlockProps).challengeType !== "Project",
+      },
+      props.className
+    ),
+    style: {
+      '--block-depth': parentId ? '1' : '0'
+    } as React.CSSProperties
   };
 
   const featureStats = features ? calculateFeatureStats(props.children) : null;
@@ -556,7 +597,30 @@ export function ContentBlock(props: ContentBlockProps) {
           {/* Title and Subtitle */}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <config.icon className="w-5 h-5" />
+              {/* Fix the icon rendering here */}
+              {props.type === "Note" ? (
+                // Special handling for Note type icons
+                createElement(
+                  props.iconConfig?.icon || noteTypeConfig[(props as NoteBlockProps).noteType].icon,
+                  {
+                    className: cn(
+                      "w-5 h-5",
+                      props.iconConfig?.className || noteTypeConfig[(props as NoteBlockProps).noteType].iconClass
+                    ),
+                    'aria-label': props.iconConfig?.ariaLabel || `${props.title} icon`,
+                    size: props.iconConfig?.size || 20
+                  }
+                )
+              ) : (
+                // Regular icon rendering for other types
+                createElement(config.icon, {
+                  ...config.iconProps,
+                  'aria-label': props.iconConfig?.ariaLabel || `${props.title} icon`,
+                  className: cn(
+                    config.iconProps?.className
+                  )
+                })
+              )}
               <h4 role="heading" className="text-lg font-semibold">
                 {props.title}
               </h4>
@@ -669,4 +733,31 @@ export function ContentBlock(props: ContentBlockProps) {
       </div>
     </section>
   );
+}
+
+// Add Error Boundary component
+export class ErrorBoundary extends React.Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Icon rendering error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
 }
