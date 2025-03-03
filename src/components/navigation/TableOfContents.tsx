@@ -1,0 +1,464 @@
+import { useState, useEffect, useContext } from "react";
+import { ChevronDown, ChevronRight, X, Box, LucideIcon } from "lucide-react";
+import { ExpandedContext } from "@/contexts/ExpandedContext";
+import { useMobileMenu } from "@/contexts/MobileMenuContext";
+import { cn } from "@/utils/common";
+import * as lucideIcons from 'lucide-react';
+
+interface TOCItem {
+  id: string;
+  title: string;
+  type: string;
+  iconName: string;
+  iconColor: string;
+  children: TOCItem[];
+}
+
+interface TableOfContentsProps {
+  className?: string;
+}
+
+const capitalizeFirstLetter = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+export function TableOfContents({ className }: TableOfContentsProps) {
+  const [tocItems, setTocItems] = useState<TOCItem[]>([]);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const { setExpandedBlocks } = useContext(ExpandedContext);
+  const { isOpen, close } = useMobileMenu();
+  const [activeId, setActiveId] = useState<string>('');
+  const [secondaryActiveIds, setSecondaryActiveIds] = useState<Set<string>>(new Set());
+
+  // Add search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredItems, setFilteredItems] = useState<TOCItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Add search filter function
+  const filterTOCItems = (items: TOCItem[], query: string): TOCItem[] => {
+    if (!query) return items;
+
+    const filtered: TOCItem[] = [];
+    
+    items.forEach(item => {
+      const matchesQuery = item.title.toLowerCase().includes(query.toLowerCase());
+      const filteredChildren = filterTOCItems(item.children, query);
+      
+      if (matchesQuery || filteredChildren.length > 0) {
+        // Create a new item with only matching children
+        filtered.push({
+          ...item,
+          children: filteredChildren
+        });
+        
+        // If this item matches, automatically expand it and its parents
+        if (matchesQuery) {
+          setExpandedItems(prev => {
+            const newSet = new Set(prev);
+            const parentIds = getParentPath(tocItems, item.id);
+            parentIds.forEach(id => newSet.add(id));
+            newSet.add(item.id);
+            return newSet;
+          });
+        }
+      }
+    });
+    
+    return filtered;
+  };
+
+  // Handle search input
+  useEffect(() => {
+    if (searchQuery) {
+      setIsSearching(true);
+      const filtered = filterTOCItems(tocItems, searchQuery);
+      setFilteredItems(filtered);
+    } else {
+      setIsSearching(false);
+      setFilteredItems([]);
+    }
+  }, [searchQuery, tocItems]);
+
+  // New helper function to get all parent IDs of an item
+  const getParentPath = (items: TOCItem[], targetId: string, path: string[] = []): string[] => {
+    for (const item of items) {
+      if (item.id === targetId) {
+        return path;
+      }
+      const foundPath = getParentPath(item.children, targetId, [...path, item.id]);
+      if (foundPath.length > 0) {
+        return foundPath;
+      }
+    }
+    return [];
+  };
+
+  useEffect(() => {
+    const buildTOCStructure = () => {
+      const mainContent = document.querySelector('main');
+      if (!mainContent) return [];
+
+      // Get all content blocks
+      const blocks = Array.from(mainContent.querySelectorAll('.content-block'));
+      
+      // Create a map for quick lookup
+      const blocksMap = new Map<string, TOCItem>();
+      
+      // First pass: Create TOC items
+      blocks.forEach(block => {
+        const id = block.id;
+        // Look for title in either h4 or the first element with role="heading"
+        const titleElement = block.querySelector('[role="heading"], h4');
+        const title = titleElement?.textContent?.trim() || '';
+        const type = block.getAttribute('data-block-type') || 'Generic';
+        const showOnTOC = block.getAttribute('data-show-toc') !== 'false';
+        
+        // Get icon and color information
+        const iconName = block.getAttribute('data-block-icon') || '';
+        const iconColor = block.getAttribute('data-block-color') || '';
+        
+        if (id && title && showOnTOC) {
+          blocksMap.set(id, {
+            id,
+            title,
+            type,
+            iconName,
+            iconColor,
+            children: []
+          });
+        }
+      });
+
+      // Second pass: Build hierarchy
+      const rootItems: TOCItem[] = [];
+      
+      // Helper function to find the immediate parent block
+      const findImmediateParent = (block: Element): string | null => {
+        let current = block.parentElement;
+        while (current) {
+          if (current.classList.contains('content-block')) {
+            return current.id;
+          }
+          current = current.parentElement;
+        }
+        return null;
+      };
+
+      blocks.forEach(block => {
+        const id = block.id;
+        // First try to get parent ID from data attribute, if not found try to find immediate parent
+        const parentId = block.getAttribute('data-parent-id') || findImmediateParent(block);
+        const tocItem = blocksMap.get(id);
+
+        if (tocItem) {
+          if (!parentId || !blocksMap.has(parentId)) {
+            // Root level item
+            rootItems.push(tocItem);
+          } else {
+            // Child item
+            const parentItem = blocksMap.get(parentId);
+            if (parentItem) {
+              parentItem.children.push(tocItem);
+            } else {
+              // If parent not found, add to root
+              rootItems.push(tocItem);
+            }
+          }
+        }
+      });
+
+      // Sort function to maintain document order
+      const sortByDOMOrder = (a: TOCItem, b: TOCItem) => {
+        const aEl = document.getElementById(a.id);
+        const bEl = document.getElementById(b.id);
+        if (!aEl || !bEl) return 0;
+        return aEl.compareDocumentPosition(bEl) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+      };
+
+      // Sort root items and their children recursively
+      const sortTOCItems = (items: TOCItem[]) => {
+        items.sort(sortByDOMOrder);
+        items.forEach(item => {
+          if (item.children.length > 0) {
+            sortTOCItems(item.children);
+          }
+        });
+      };
+
+      sortTOCItems(rootItems);
+      return rootItems;
+    };
+
+    const extractTOC = () => {
+      const items = buildTOCStructure();
+      setTocItems(items);
+    };
+
+    extractTOC();
+
+    // Set up observer for dynamic content changes
+    const observer = new MutationObserver((mutations) => {
+      const shouldUpdate = mutations.some(mutation => 
+        mutation.type === 'childList' || 
+        (mutation.type === 'attributes' && 
+         ['id', 'data-block-type', 'data-show-toc', 'data-parent-id'].includes(mutation.attributeName || ''))
+      );
+
+      if (shouldUpdate) {
+        extractTOC();
+      }
+    });
+
+    observer.observe(document.querySelector('main') || document.body, { 
+      childList: true, 
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['id', 'data-block-type', 'data-show-toc', 'data-parent-id']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Modified toggleItem to also handle content block expansion
+  const toggleItem = (id: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  // Modified scrollToItem to expand both TOC and content blocks
+  const scrollToItem = (id: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Get all parent IDs
+    const parentIds = getParentPath(tocItems, id);
+    
+    // Expand all parents in TOC
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      parentIds.forEach(parentId => newSet.add(parentId));
+      newSet.add(id);
+      return newSet;
+    });
+
+    // Expand both the clicked item and all its parents in content blocks
+    setExpandedBlocks(prev => {
+      const newSet = new Set(prev);
+      // Recursive function to add all ancestors
+      const addAncestors = (itemId: string) => {
+        newSet.add(itemId);
+        const parentIds = getParentPath(tocItems, itemId);
+        if (parentIds.length > 0) {
+          addAncestors(parentIds[parentIds.length - 1]);
+        }
+      };
+      // Start the recursive expansion from the clicked item
+      addAncestors(id);
+      return newSet;
+    });
+    
+    // Scroll to the item
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  // Add Intersection Observer to track visible sections
+  useEffect(() => {
+    const visibleSections = new Set<string>();
+    let primarySection: string | null = null;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const targetId = entry.target.id;
+
+          if (entry.isIntersecting) {
+            visibleSections.add(targetId);
+            
+            // If this section is more than 50% visible, make it primary
+            if (entry.intersectionRatio >= 0.5) {
+              primarySection = targetId;
+            }
+          } else {
+            visibleSections.delete(targetId);
+          }
+        });
+
+        // Update primary active section
+        if (primarySection) {
+          setActiveId(primarySection);
+          
+          // Expand TOC for primary section
+          const parentIds = getParentPath(tocItems, primarySection);
+          setExpandedItems(prev => {
+            const newSet = new Set(prev);
+            parentIds.forEach(id => newSet.add(id));
+            if (primarySection) {
+              newSet.add(primarySection);
+            }
+            return newSet;
+          });
+        }
+
+        // Update secondary active sections (excluding primary)
+        setSecondaryActiveIds(new Set(
+          Array.from(visibleSections).filter(id => id !== primarySection)
+        ));
+      },
+      {
+        threshold: [0, 0.5, 1.0], // Track different visibility thresholds
+        rootMargin: '-10% 0px -10% 0px' // Slightly reduced margin for better accuracy
+      }
+    );
+
+    // Observe all content blocks
+    document.querySelectorAll('.content-block').forEach((section) => {
+      observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [tocItems]); // Add tocItems as dependency since we use it in the callback
+
+  const renderTOCItem = (item: TOCItem) => {
+    const hasChildren = item.children.length > 0;
+    const isExpanded = expandedItems.has(item.id);
+    const isPrimaryActive = activeId === item.id;
+    const isSecondaryActive = secondaryActiveIds.has(item.id);
+    
+    // Import all icons at the top of the file
+    const IconComponent = (lucideIcons[capitalizeFirstLetter(item.iconName) as keyof typeof lucideIcons] || Box) as LucideIcon;
+
+    return (
+      <li key={item.id} className="mt-2">
+        <div className="flex items-center gap-2">
+          {hasChildren && (
+            <button
+              onClick={(e) => toggleItem(item.id, e)}
+              className="p-1 hover:bg-accent/50 rounded"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
+          )}
+          {!hasChildren && <div className="w-6" />}
+          <button
+            onClick={(e) => scrollToItem(item.id, e)}
+            className={cn(
+              "flex-grow text-left text-sm transition-colors duration-200 flex items-center gap-2",
+              isPrimaryActive && "text-accent font-medium",
+              isSecondaryActive && "text-accent/70",
+              !isPrimaryActive && !isSecondaryActive && "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <IconComponent className={`h-4 w-4 ${item.iconColor}`} />
+            <span>{item.title}</span>
+          </button>
+        </div>
+        
+        {hasChildren && isExpanded && (
+          <ul className="ml-4 border-l border-border/20 pl-2">
+            {item.children.map(renderTOCItem)}
+          </ul>
+        )}
+      </li>
+    );
+  };
+
+  return (
+    <nav className={cn(
+      // Base styles
+      'toc-container rounded-lg border bg-card/50 p-4 backdrop-blur-sm',
+      'flex flex-col', // Add flex container
+      
+      // Mobile styles
+      'fixed inset-y-0 left-0 w-[80vw] max-w-[350px] rounded-none border-r z-50',
+      isOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : '-translate-x-full opacity-0 pointer-events-none',
+      
+      // Desktop styles
+      'lg:sticky lg:top-20 lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto lg:w-full lg:max-w-none',
+      'lg:h-[calc(100vh-8rem)]', // Fixed height for desktop
+      
+      // Transitions
+      'transition-all duration-300 ease-in-out',
+      className
+    )}>
+      {/* Header Section - Fixed */}
+      <div className="flex-none border-b pb-4">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">
+              Table of Contents
+            </h2>
+            <button
+              onClick={close}
+              className="lg:hidden p-2 hover:bg-accent/50 rounded-lg"
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          {/* Search Section */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search contents..."
+              className="w-full px-3 py-2 text-sm bg-background/50 border rounded-md pr-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Search Results Count */}
+          {isSearching && (
+            <div className="text-sm text-muted-foreground">
+              {filteredItems.length === 0 
+                ? 'No matches found' 
+                : `Found ${filteredItems.length} match${filteredItems.length > 1 ? 'es' : ''}`
+              }
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Content List - Scrollable */}
+      <div className="flex-1 overflow-y-auto mt-4 custom-scrollbar">
+        <ul className="space-y-2 pr-2">
+          {(isSearching ? filteredItems : tocItems).map(renderTOCItem)}
+        </ul>
+      </div>
+    </nav>
+  );
+}
