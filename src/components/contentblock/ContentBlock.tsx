@@ -25,7 +25,7 @@ import { FileStructureView } from './FileStructureView';
 import { CodeHighlighter } from "./CodeHighlighter";
 import { ExpandedContext } from "@/contexts/ExpandedContext";
 import { MarkdownBlock } from './MarkdownBlock';
-import { IconProps, isValidLucideIcon } from '@/utils/iconUtils';
+import { IconProps } from '@/utils/iconUtils';
 import { cn } from '@/utils/common';
 import { type ColorToken } from '@/types/colors';
 import { getColorClass } from '@/utils/colors';
