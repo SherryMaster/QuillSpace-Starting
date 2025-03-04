@@ -35,6 +35,7 @@ import { type ColorToken } from '@/types/colors';
 import { getColorClass } from '@/utils/colors';
 import type { MediaType, VideoBlockProps } from '@/types/media';
 import { MediaBlock } from './MediaBlock';
+import { removeCommonIndentation } from "@/utils/common";
 
 const defaultBlockColors = {
   Classic: 'gray',
@@ -163,8 +164,10 @@ interface MarkdownBlockProps extends BaseBlockProps {
 
 interface MediaBlockProps extends BaseBlockProps {
   type: "Media";
-  url: string;
+  title: string;
   mediaType: MediaType;
+  url: string;
+  timestamps?: string; // Now accepts raw string
   aspectRatio?: string;
   autoPlay?: boolean;
   controls?: boolean;
@@ -869,7 +872,7 @@ export function ContentBlock(props: ContentBlockProps) {
 
           {props.type === "Markdown" && (
             <div className="prose dark:prose-invert max-w-none">
-              <MarkdownBlock content={(props as MarkdownBlockProps).content} />
+              <MarkdownBlock content={removeCommonIndentation((props as MarkdownBlockProps).content)} />
             </div>
           )}
 
@@ -880,6 +883,7 @@ export function ContentBlock(props: ContentBlockProps) {
               mediaType={(props as MediaBlockProps).mediaType}
               type="Media"
               title={props.title}
+              timestamps={(props as MediaBlockProps).timestamps ? removeCommonIndentation((props as MediaBlockProps).timestamps as string) : undefined}
             />
           )}
 

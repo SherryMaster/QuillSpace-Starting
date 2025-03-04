@@ -18,32 +18,32 @@ function App() {
           type="Media"
           mediaType="Video"
           url='https://www.youtube.com/watch?v=M9O5AjEFzKw'
-          timestamps={removeCommonIndentation(`
-          00:00 - Intro
-          4:31 - React Fundamentals
-          2:45:30 - React Hooks
-          4:00:22 - React Projects For Beginners
-          6:43:39 - TypeScript Complete Course
-          10:12:04 - React With TypeScript
-          11:38:02 - Popular Component Libraries
-          11:51:08 - React Hook Form
-          12:13:17 - React 19 Features
-          16:17:25 - Framer Motion
-          21:37:27 - Zustand
-          26:08:14 - Redux Toolkit
-          27:25:58 - React Design Patterns
-          32:02:11 - TanStack Query
-          33:13:19 - Unit Testing
-          35:15:21 - React Testing
-          37:10:25 - React Design System
-          37:41:12 - React Storybook
-          38:51:49 - Useful Packages For Design System
-          39:21:59 - Building Component Library
-          42:11:32 - React Monorepos
-          42:25:30 - Building Complete Design System For Company
-          43:22:40 - FullStack Project
-          50:31:53 - Outro
-        `)}
+          timestamps={`
+            00:00 - Intro
+            4:31 - React Fundamentals
+            2:45:30 - React Hooks
+            4:00:22 - React Projects For Beginners
+            6:43:39 - TypeScript Complete Course
+            10:12:04 - React With TypeScript
+            11:38:02 - Popular Component Libraries
+            11:51:08 - React Hook Form
+            12:13:17 - React 19 Features
+            16:17:25 - Framer Motion
+            21:37:27 - Zustand
+            26:08:14 - Redux Toolkit
+            27:25:58 - React Design Patterns
+            32:02:11 - TanStack Query
+            33:13:19 - Unit Testing
+            35:15:21 - React Testing
+            37:10:25 - React Design System
+            37:41:12 - React Storybook
+            38:51:49 - Useful Packages For Design System
+            39:21:59 - Building Component Library
+            42:11:32 - React Monorepos
+            42:25:30 - Building Complete Design System For Company
+            43:22:40 - FullStack Project
+            50:31:53 - Outro
+          `}
         />
 
         <ContentBlock 
@@ -79,7 +79,7 @@ function App() {
 
         <ContentBlock type="Code" title="Example Code" code="console.log('Hello, World!');" extension="js" >
 
-        <ContentBlock type="Markdown" title="Markdown Content" content={removeCommonIndentation(`
+        <ContentBlock type="Markdown" title="Markdown Content" content={`
           # Heading 1
           ## Heading 2
           ### Heading 3
@@ -92,7 +92,7 @@ function App() {
           \`\`\`javascript
           console.log('Hello, World!');
           \`\`\`
-        `)}
+        `}
         />
       </ContentBlock>
       </ContentBlock>
