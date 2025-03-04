@@ -33,7 +33,7 @@ import { IconProps } from '@/utils/iconUtils';
 import { cn } from '@/utils/common';
 import { type ColorToken } from '@/types/colors';
 import { getColorClass } from '@/utils/colors';
-import type { MediaType } from '@/types/media';
+import type { MediaType, VideoBlockProps } from '@/types/media';
 import { MediaBlock } from './MediaBlock';
 
 const defaultBlockColors = {
@@ -178,7 +178,8 @@ export type ContentBlockProps =
   | ChallengeBlockProps
   | CodeBlockProps
   | MarkdownBlockProps
-  | MediaBlockProps;
+  | VideoBlockProps  // Add this
+  | MediaBlockProps;  // Keep this for other media types
 
 const noteTypeConfig: Record<NoteBlockProps['noteType'], {
     containerClass: string;
@@ -875,11 +876,12 @@ export function ContentBlock(props: ContentBlockProps) {
 
           {props.type === "Media" && (
             <MediaBlock
+              {...(props as MediaBlockProps)}
               url={(props as MediaBlockProps).url}
               mediaType={(props as MediaBlockProps).mediaType}
-              aspectRatio={(props as MediaBlockProps).aspectRatio}
-              autoPlay={(props as MediaBlockProps).autoPlay}
-              controls={(props as MediaBlockProps).controls} type={"Media"} title={""} />
+              type="Media"
+              title={props.title}
+            />
           )}
 
           {/* Children content */}

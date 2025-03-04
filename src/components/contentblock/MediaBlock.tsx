@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Play, Image as ImageIcon, Film, Music, LucideIcon, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/utils/common';
-import { MediaBlockProps, MediaType } from '@/types/media';
+import { MediaBlockProps, MediaType, VideoTimestamp, VideoBlockProps } from '@/types/media';
+import { parseTimestamps } from '@/utils/videoUtils';
+import { VideoTimestamps } from './VideoTimestamps';
 
 interface LoadingAnimationProps {
   type: MediaType;
@@ -68,28 +70,109 @@ const mediaTypeConfig: Record<MediaType, {
   }
 };
 
-export function MediaBlock({ url, mediaType, aspectRatio, ...props }: MediaBlockProps) {
+interface YouTubePlayer {
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  getCurrentTime: () => number;
+  getPlayerState: () => number;
+  destroy: () => void;
+}
+
+declare global {
+  interface Window {
+    YT?: YT;  // Use the YT interface from youtube.d.ts
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
+export function MediaBlock({ 
+  url, 
+  mediaType, 
+  aspectRatio, 
+  timestamps = (mediaType === 'Video' ? '' : undefined),
+  ...props 
+}: MediaBlockProps & Partial<Pick<VideoBlockProps, 'timestamps'>>) {  
   const [status, setStatus] = useState<'loading' | 'error' | 'loaded'>('loading');
+  const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | HTMLImageElement | null>(null);
+  const [parsedTimestamps, setParsedTimestamps] = useState<VideoTimestamp[]>([]);
+  const playerRef = useRef<YouTubePlayer | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  // Initialize YouTube API
+  useEffect(() => {
+    if (mediaType === 'Video' && url.includes('youtube.com/embed/')) {
+      // Load YouTube API if not already loaded
+      if (!window.YT) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      }
+
+      // Initialize player when API is ready
+      const initPlayer = () => {
+        const videoId = url.split('/').pop()?.split('?')[0];
+        if (!videoId) return;
+        
+        if (!window.YT) {
+          return;
+        }
+        playerRef.current = new window.YT.Player(playerContainerRef.current!, {
+          videoId,
+          playerVars: {
+            modestbranding: 1,
+            rel: 0,
+            controls: 1
+          },
+          events: {
+            onReady: () => {
+              setStatus('loaded');
+              
+              // Start time tracking
+              const timeUpdateInterval = setInterval(() => {
+                if (playerRef.current) {
+                  const time = playerRef.current.getCurrentTime();
+                  setCurrentTime(time);
+                }
+              }, 200);
+
+              return () => clearInterval(timeUpdateInterval);
+            },
+            onStateChange: (event: { data: any; }) => {
+              // -1: unstarted, 0: ended, 1: playing, 2: paused, 3: buffering, 5: video cued
+              if (window.YT?.PlayerState && event.data === window.YT.PlayerState.PLAYING) {
+                setStatus('loaded');
+              }
+            },
+            onError: () => {
+              setStatus('error');
+            }
+          }
+        });
+      };
+
+      if (window.YT && window.YT.Player) {
+        initPlayer();
+      } else {
+        window.onYouTubeIframeAPIReady = initPlayer;
+      }
+
+      return () => {
+        if (playerRef.current) {
+          // Cleanup player
+          playerRef.current = null;
+        }
+      };
+    }
+  }, [mediaType, url]);
 
   useEffect(() => {
-    if (mediaRef.current) {
-      if (mediaRef.current instanceof HTMLMediaElement) {
-        if (mediaRef.current.readyState >= 2) {
-          setStatus('loaded');
-        }
-
-        const media = mediaRef.current;
-        const handleEnded = () => setStatus('loaded');
-
-        media.addEventListener('ended', handleEnded);
-        return () => {
-          media.removeEventListener('ended', handleEnded);
-        };
-      }
+    if (timestamps && mediaType === 'Video') {
+      const parsed = parseTimestamps(timestamps);
+      setParsedTimestamps(parsed);
     }
-  }, [url]);
+  }, [timestamps, mediaType]);
 
   const handleRetry = () => {
     setStatus('loading');
@@ -105,6 +188,14 @@ export function MediaBlock({ url, mediaType, aspectRatio, ...props }: MediaBlock
 
   const handleMediaLoaded = () => {
     setStatus('loaded');
+    
+    // Update current time to trigger timestamp highlighting
+    if (mediaRef.current instanceof HTMLVideoElement) {
+      setCurrentTime(mediaRef.current.currentTime);
+    } else if (playerRef.current) {
+      setCurrentTime(playerRef.current.getCurrentTime());
+    }
+    
     setIsSeeking(false);
   };
 
@@ -116,21 +207,31 @@ export function MediaBlock({ url, mediaType, aspectRatio, ...props }: MediaBlock
     }
   };
 
+  const handleTimestampClick = (time: number) => {
+    console.log('Seeking to time:', time);
+    if (mediaRef.current instanceof HTMLVideoElement) {
+      mediaRef.current.currentTime = time;
+    } else if (playerRef.current) {
+      playerRef.current.seekTo(time, true);
+    }
+  };
+
+  const renderYouTubeVideo = () => {
+    return (
+      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}> {/* 16:9 aspect ratio */}
+        <div 
+          ref={playerContainerRef}
+          className="absolute inset-0 w-full h-full"
+        />
+      </div>
+    );
+  };
+
   const renderMedia = () => {
     switch (mediaType) {
       case 'Video':
-        // Check if it's a YouTube URL
         if (url.includes('youtube.com/embed/')) {
-          return (
-            <iframe
-              src={url}
-              className="w-full aspect-video"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              onLoad={() => setStatus('loaded')}
-              onError={() => setStatus('error')}
-            />
-          );
+          return renderYouTubeVideo();
         }
         // For other videos
         return (
@@ -141,11 +242,12 @@ export function MediaBlock({ url, mediaType, aspectRatio, ...props }: MediaBlock
             autoPlay={props.autoPlay}
             onLoadedData={() => setStatus('loaded')}
             onError={() => setStatus('error')}
+            onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
           >
             <source src={url} />
           </video>
         );
-      case 'Audio':
+      case 'Audio': {
         return (
           <div className="w-full flex flex-col gap-2">
             <audio
@@ -178,6 +280,7 @@ export function MediaBlock({ url, mediaType, aspectRatio, ...props }: MediaBlock
             </audio>
           </div>
         );
+      }
       case 'Image':
       case 'GIF':
         return (
@@ -199,11 +302,18 @@ export function MediaBlock({ url, mediaType, aspectRatio, ...props }: MediaBlock
     <div className={cn(
       'relative overflow-hidden rounded-lg',
       mediaTypeConfig[mediaType].containerClass,
-      status === 'loading' && !isSeeking && mediaTypeConfig[mediaType].loadingAnimation
+      status === 'loading' && mediaTypeConfig[mediaType].loadingAnimation
     )}>
-      {status === 'loading' && !isSeeking && <LoadingAnimation type={mediaType} />}
+      {status === 'loading' && <LoadingAnimation type={mediaType} />}
       {status === 'error' && <ErrorDisplay onRetry={handleRetry} />}
       {renderMedia()}
+      {mediaType === 'Video' && parsedTimestamps.length > 0 && (
+        <VideoTimestamps 
+          timestamps={parsedTimestamps}
+          onTimestampClick={handleTimestampClick}
+          currentTime={currentTime}
+        />
+      )}
     </div>
   );
 }
