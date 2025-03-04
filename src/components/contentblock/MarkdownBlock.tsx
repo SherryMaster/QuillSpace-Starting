@@ -32,7 +32,6 @@ function CodeBlockWrapper({ children, code, language }: CodeBlockWrapperProps) {
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy code:", err);
     }
   };
 

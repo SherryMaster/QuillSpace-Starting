@@ -578,7 +578,6 @@ export function ContentBlock(props: ContentBlockProps) {
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
       } catch (err) {
-        console.error("Failed to copy code:", err);
       }
     }
   };
@@ -924,8 +923,7 @@ export class ErrorBoundary extends React.Component<
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Icon rendering error:', error, errorInfo);
+  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
   }
 
   render() {

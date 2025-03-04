@@ -208,7 +208,6 @@ export function MediaBlock({
   };
 
   const handleTimestampClick = (time: number) => {
-    console.log('Seeking to time:', time);
     if (mediaRef.current instanceof HTMLVideoElement) {
       mediaRef.current.currentTime = time;
     } else if (playerRef.current) {
