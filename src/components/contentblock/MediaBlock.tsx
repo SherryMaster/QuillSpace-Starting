@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Play, Image as ImageIcon, Film, Music, LucideIcon, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/utils/common';
 import { MediaBlockProps, MediaType, VideoTimestamp, VideoBlockProps } from '@/types/media';
-import { parseTimestamps } from '@/utils/videoUtils';
+import { parseTimestamps, convertToYouTubeEmbedURL } from '@/utils/videoUtils';
 import { VideoTimestamps } from './VideoTimestamps';
 
 interface LoadingAnimationProps {
@@ -99,9 +99,17 @@ export function MediaBlock({
   const playerRef = useRef<YouTubePlayer | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
+  // Process YouTube URL if needed
+  const processedUrl = useMemo(() => {
+    if (mediaType === 'Video' && (url.includes('youtube.com') || url.includes('youtu.be'))) {
+      return convertToYouTubeEmbedURL(url);
+    }
+    return url;
+  }, [url, mediaType]);
+
   // Initialize YouTube API
   useEffect(() => {
-    if (mediaType === 'Video' && url.includes('youtube.com/embed/')) {
+    if (mediaType === 'Video' && processedUrl.includes('youtube.com/embed/')) {
       // Load YouTube API if not already loaded
       if (!window.YT) {
         const tag = document.createElement('script');
@@ -112,44 +120,52 @@ export function MediaBlock({
 
       // Initialize player when API is ready
       const initPlayer = () => {
-        const videoId = url.split('/').pop()?.split('?')[0];
-        if (!videoId) return;
-        
-        if (!window.YT) {
-          return;
-        }
-        playerRef.current = new window.YT.Player(playerContainerRef.current!, {
-          videoId,
-          playerVars: {
-            modestbranding: 1,
-            rel: 0,
-            controls: 1
-          },
-          events: {
-            onReady: () => {
-              setStatus('loaded');
-              
-              // Start time tracking
-              const timeUpdateInterval = setInterval(() => {
-                if (playerRef.current) {
-                  const time = playerRef.current.getCurrentTime();
-                  setCurrentTime(time);
-                }
-              }, 200);
-
-              return () => clearInterval(timeUpdateInterval);
+        try {
+          const urlObj = new URL(processedUrl);
+          const videoId = urlObj.pathname.split('/').pop();
+          const clip = urlObj.searchParams.get('clip');
+          const clipt = urlObj.searchParams.get('clipt');
+          
+          if (!videoId) return;
+          
+          if (!window.YT) return;
+          
+          playerRef.current = new window.YT.Player(playerContainerRef.current!, {
+            videoId,
+            playerVars: {
+              modestbranding: 1,
+              rel: 0,
+              controls: 1,
+              ...(clip && clipt ? { clip, clipt } : {})
             },
-            onStateChange: (event: { data: any; }) => {
-              // -1: unstarted, 0: ended, 1: playing, 2: paused, 3: buffering, 5: video cued
-              if (window.YT?.PlayerState && event.data === window.YT.PlayerState.PLAYING) {
+            events: {
+              onReady: () => {
                 setStatus('loaded');
+                
+                // Start time tracking
+                const timeUpdateInterval = setInterval(() => {
+                  if (playerRef.current) {
+                    const time = playerRef.current.getCurrentTime();
+                    setCurrentTime(time);
+                  }
+                }, 200);
+
+                return () => clearInterval(timeUpdateInterval);
+              },
+              onStateChange: (event: { data: any; }) => {
+                if (window.YT?.PlayerState && event.data === window.YT.PlayerState.PLAYING) {
+                  setStatus('loaded');
+                }
+              },
+              onError: () => {
+                setStatus('error');
               }
-            },
-            onError: () => {
-              setStatus('error');
             }
-          }
-        });
+          });
+        } catch (error) {
+          console.error('Error initializing YouTube player:', error);
+          setStatus('error');
+        }
       };
 
       if (window.YT && window.YT.Player) {
@@ -160,12 +176,12 @@ export function MediaBlock({
 
       return () => {
         if (playerRef.current) {
-          // Cleanup player
+          playerRef.current.destroy();
           playerRef.current = null;
         }
       };
     }
-  }, [mediaType, url]);
+  }, [mediaType, processedUrl]);
 
   useEffect(() => {
     if (timestamps && mediaType === 'Video') {
@@ -217,7 +233,7 @@ export function MediaBlock({
 
   const renderYouTubeVideo = () => {
     return (
-      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}> {/* 16:9 aspect ratio */}
+      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
         <div 
           ref={playerContainerRef}
           className="absolute inset-0 w-full h-full"
@@ -229,7 +245,7 @@ export function MediaBlock({
   const renderMedia = () => {
     switch (mediaType) {
       case 'Video':
-        if (url.includes('youtube.com/embed/')) {
+        if (processedUrl.includes('youtube.com/embed/')) {
           return renderYouTubeVideo();
         }
         // For other videos
@@ -243,7 +259,7 @@ export function MediaBlock({
             onError={() => setStatus('error')}
             onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
           >
-            <source src={url} />
+            <source src={processedUrl} />
           </video>
         );
       case 'Audio': {
