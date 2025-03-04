@@ -43,6 +43,7 @@ function App() {
             43:22:40 - FullStack Project
             50:31:53 - Outro
           `}
+          timestampsColor={"green"}
         />
 
         <ContentBlock 

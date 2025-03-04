@@ -167,7 +167,8 @@ interface MediaBlockProps extends BaseBlockProps {
   title: string;
   mediaType: MediaType;
   url: string;
-  timestamps?: string; // Now accepts raw string
+  timestamps?: string; 
+  timestampsColor?: ColorToken;
   aspectRatio?: string;
   autoPlay?: boolean;
   controls?: boolean;
@@ -181,8 +182,8 @@ export type ContentBlockProps =
   | ChallengeBlockProps
   | CodeBlockProps
   | MarkdownBlockProps
-  | VideoBlockProps  // Add this
-  | MediaBlockProps;  // Keep this for other media types
+  | VideoBlockProps  
+  | MediaBlockProps;
 
 const noteTypeConfig: Record<NoteBlockProps['noteType'], {
     containerClass: string;

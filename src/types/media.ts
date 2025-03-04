@@ -1,4 +1,5 @@
 import type { BaseBlockProps } from '@/components/contentblock/ContentBlock';
+import { ColorToken } from './colors';
 
 export type MediaType = 'Video' | 'Audio' | 'Image' | 'GIF';
 
@@ -21,6 +22,7 @@ interface BaseMediaBlockProps extends BaseBlockProps {
 export interface VideoBlockProps extends BaseMediaBlockProps {
   mediaType: 'Video';
   timestamps?: string | VideoTimestamp[];
+  timestampsColor?: ColorToken;
 }
 
 // Audio-specific props

@@ -89,8 +89,9 @@ export function MediaBlock({
   mediaType, 
   aspectRatio, 
   timestamps = (mediaType === 'Video' ? '' : undefined),
+  timestampsColor, // Add this new prop
   ...props 
-}: MediaBlockProps & Partial<Pick<VideoBlockProps, 'timestamps'>>) {  
+}: MediaBlockProps & Partial<Pick<VideoBlockProps, 'timestamps' | 'timestampsColor'>>) {  
   const [status, setStatus] = useState<'loading' | 'error' | 'loaded'>('loading');
   const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
@@ -325,11 +326,14 @@ export function MediaBlock({
         {status === 'error' && <ErrorDisplay onRetry={handleRetry} />}
       </div>
       {mediaType === 'Video' && parsedTimestamps.length > 0 && (
-        <VideoTimestamps 
-          timestamps={parsedTimestamps}
-          onTimestampClick={handleTimestampClick}
-          currentTime={currentTime}
-        />
+        <div className="mt-4">
+          <VideoTimestamps
+            timestamps={parsedTimestamps}
+            onTimestampClick={handleTimestampClick}
+            currentTime={currentTime}
+            color={timestampsColor || "purple"} // Use the new prop here, fallback to default
+          />
+        </div>
       )}
     </div>
   );
