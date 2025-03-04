@@ -80,8 +80,7 @@ interface BlockConfig {
   icon: LucideIcon;
   containerClass: string;
   badgeClass: string;
-  contentClass: string;
-  iconProps?: Partial<IconProps>;
+  iconProps?: IconProps;
 }
 
 interface FeatureStats {
@@ -270,8 +269,7 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
   const initialConfig: BlockConfig = {
     icon: Box,
     containerClass: "bg-background",
-    badgeClass: "bg-primary/10 text-primary",
-    contentClass: "bg-background"
+    badgeClass: "bg-primary/10 text-primary"
   };
 
   // Add media block configuration
@@ -283,7 +281,10 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
       icon: mediaConfig.icon,
       containerClass: mediaConfig.containerClass,
       badgeClass: mediaConfig.badgeClass,
-      iconProps: mediaConfig.iconProps
+      iconProps: {
+        icon: mediaConfig.icon,
+        ...mediaConfig.iconProps
+      }
     };
   }
 
@@ -294,8 +295,8 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
       icon,
       containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
       badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
-      contentClass: getColorClass('gray-500', 'bg', 5),
       iconProps: {
+        icon,  // Add the icon property
         size: props.iconConfig?.size || 20,
         className: cn(
           "w-5 h-5",
@@ -307,44 +308,37 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
     Generic: {
       icon,
       containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
-      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
-      contentClass: getColorClass('gray-500', 'bg', 5)
+      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text')
     },
     Note: {
       icon,
       containerClass: getColorClass('blue-500', 'border', 20) + ' ' + getColorClass('blue-500', 'bg', 5),
-      badgeClass: getColorClass('blue-500', 'bg', 10) + ' ' + getColorClass('blue-500', 'text'),
-      contentClass: getColorClass('blue-500', 'bg', 5)
+      badgeClass: getColorClass('blue-500', 'bg', 10) + ' ' + getColorClass('blue-500', 'text')
     },
     FileStructureView: {
       icon,
       containerClass: getColorClass('green-500', 'border', 20) + ' ' + getColorClass('green-500', 'bg', 5),
-      badgeClass: getColorClass('green-500', 'bg', 10) + ' ' + getColorClass('green-500', 'text'),
-      contentClass: getColorClass('green-500', 'bg', 5)
+      badgeClass: getColorClass('green-500', 'bg', 10) + ' ' + getColorClass('green-500', 'text')
     },
     Challenge: {
       icon,
       containerClass: getColorClass('blue-500', 'border', 20) + ' ' + getColorClass('blue-500', 'bg', 5),
-      badgeClass: getColorClass('blue-500', 'bg', 10) + ' ' + getColorClass('blue-500', 'text'),
-      contentClass: getColorClass('blue-500', 'bg', 5)
+      badgeClass: getColorClass('blue-500', 'bg', 10) + ' ' + getColorClass('blue-500', 'text')
     },
     Code: {
       icon,
       containerClass: getColorClass('cyan-500', 'border', 20) + ' ' + getColorClass('cyan-500', 'bg', 5),
-      badgeClass: getColorClass('cyan-500', 'bg', 10) + ' ' + getColorClass('cyan-500', 'text'),
-      contentClass: getColorClass('cyan-500', 'bg', 5)
+      badgeClass: getColorClass('cyan-500', 'bg', 10) + ' ' + getColorClass('cyan-500', 'text')
     },
     Markdown: {
       icon,
       containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
-      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
-      contentClass: getColorClass('gray-500', 'bg', 5)
+      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text')
     },
     Media: {
       icon,
       containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
-      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
-      contentClass: getColorClass('gray-500', 'bg', 5)
+      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text')
     }
   };
 
@@ -371,8 +365,7 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
     config = {
       ...config,
       containerClass: `border-${color}/20 bg-${color}/5`,
-      badgeClass: `bg-${color}/10 text-${color}`,
-      contentClass: `bg-${color}/5`
+      badgeClass: `bg-${color}/10 text-${color}`
     };
   }
 
@@ -383,9 +376,9 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
       ...config,
       icon: noteConfig.icon,
       containerClass: noteConfig.containerClass,
-      contentClass: noteConfig.contentClass,
       badgeClass: noteConfig.bgClass,
       iconProps: {
+        icon: noteConfig.icon,
         className: cn("w-5 h-5", noteConfig.iconClass),
         size: props.iconConfig?.size || 20
       }
@@ -778,7 +771,7 @@ export function ContentBlock(props: ContentBlockProps) {
           : "opacity-0 invisible h-0 overflow-hidden"
       }`}>
         {/* Block's own content based on type */}
-        <div className={cn("space-y-4", config.contentClass)}>
+        <div className="space-y-4">
           {props.type === "Note" && (
             <div className={cn(
               "rounded-lg p-4",
