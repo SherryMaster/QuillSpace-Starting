@@ -36,6 +36,17 @@ import { getColorClass } from '@/utils/colors';
 import type { MediaType } from '@/types/media';
 import { MediaBlock } from './MediaBlock';
 
+const defaultBlockColors = {
+  Classic: 'gray',
+  Generic: 'gray',
+  Note: 'blue',
+  FileStructureView: 'green',
+  Challenge: 'blue',
+  Code: 'cyan',
+  Markdown: 'gray',
+  Media: 'purple'
+} as const;
+
 export const mediaTypeConfig: Record<MediaType, {
   icon: LucideIcon;
   containerClass: string;
@@ -178,43 +189,43 @@ const noteTypeConfig: Record<NoteBlockProps['noteType'], {
     icon: LucideIcon;
 }> = {
     primary: {
-      containerClass: `border-2 ${getColorClass('blue-500', 'border', 20)} ${getColorClass('blue-500', 'bg', 5)}`,
-      contentClass: getColorClass('blue-500', 'bg', 5),
+      containerClass: `border-2 ${getColorClass('blue', 'border', 20)} ${getColorClass('blue', 'bg', 5)}`,
+      contentClass: getColorClass('blue', 'bg', 5),
       textClass: "text-blue-700 dark:text-blue-300",
-      bgClass: getColorClass('blue-500', 'bg', 10),
-      iconClass: getColorClass('blue-500', 'text'),
+      bgClass: getColorClass('blue', 'bg', 10),
+      iconClass: getColorClass('blue', 'text'),
       icon: InfoIcon
     },
     secondary: {
-      containerClass: `border-2 ${getColorClass('gray-500', 'border', 20)} ${getColorClass('gray-500', 'bg', 5)}`,
-      contentClass: getColorClass('gray-500', 'bg', 5),
+      containerClass: `border-2 ${getColorClass('gray', 'border', 20)} ${getColorClass('gray', 'bg', 5)}`,
+      contentClass: getColorClass('gray', 'bg', 5),
       textClass: "text-gray-700 dark:text-gray-300",
-      bgClass: getColorClass('gray-500', 'bg', 10),
-      iconClass: getColorClass('gray-500', 'text'),
+      bgClass: getColorClass('gray', 'bg', 10),
+      iconClass: getColorClass('gray', 'text'),
       icon: HelpCircle
     },
     info: {
-      containerClass: `border-2 ${getColorClass('cyan-500', 'border', 20)} ${getColorClass('cyan-500', 'bg', 5)}`,
-      contentClass: getColorClass('cyan-500', 'bg', 5),
+      containerClass: `border-2 ${getColorClass('cyan', 'border', 20)} ${getColorClass('cyan', 'bg', 5)}`,
+      contentClass: getColorClass('cyan', 'bg', 5),
       textClass: "text-cyan-700 dark:text-cyan-300",
-      bgClass: getColorClass('cyan-500', 'bg', 10),
-      iconClass: getColorClass('cyan-500', 'text'),
+      bgClass: getColorClass('cyan', 'bg', 10),
+      iconClass: getColorClass('cyan', 'text'),
       icon: Info
     },
     warning: {
-      containerClass: `border-2 ${getColorClass('yellow-500', 'border', 20)} ${getColorClass('yellow-500', 'bg', 5)}`,
-      contentClass: getColorClass('yellow-500', 'bg', 5),
+      containerClass: `border-2 ${getColorClass('yellow', 'border', 20)} ${getColorClass('yellow', 'bg', 5)}`,
+      contentClass: getColorClass('yellow', 'bg', 5),
       textClass: "text-yellow-700 dark:text-yellow-300",
-      bgClass: getColorClass('yellow-500', 'bg', 10),
-      iconClass: getColorClass('yellow-500', 'text'),
+      bgClass: getColorClass('yellow', 'bg', 10),
+      iconClass: getColorClass('yellow', 'text'),
       icon: AlertTriangle
     },
     critical: {
-      containerClass: `border-2 ${getColorClass('red-500', 'border', 20)} ${getColorClass('red-500', 'bg', 5)}`,
-      contentClass: getColorClass('red-500', 'bg', 5),
+      containerClass: `border-2 ${getColorClass('red', 'border', 20)} ${getColorClass('red', 'bg', 5)}`,
+      contentClass: getColorClass('red', 'bg', 5),
       textClass: "text-red-700 dark:text-red-300",
-      bgClass: getColorClass('red-500', 'bg', 10),
-      iconClass: getColorClass('red-500', 'text'),
+      bgClass: getColorClass('red', 'bg', 10),
+      iconClass: getColorClass('red', 'text'),
       icon: AlertOctagon
     }
 };
@@ -293,10 +304,10 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
   const blockConfigs: Record<ContentBlockProps["type"], BlockConfig> = {
     Classic: {
       icon,
-      containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
-      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text'),
+      containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
+      badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text'),
       iconProps: {
-        icon,  // Add the icon property
+        icon,
         size: props.iconConfig?.size || 20,
         className: cn(
           "w-5 h-5",
@@ -307,38 +318,38 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
     },
     Generic: {
       icon,
-      containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
-      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text')
+      containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
+      badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text')
     },
     Note: {
       icon,
-      containerClass: getColorClass('blue-500', 'border', 20) + ' ' + getColorClass('blue-500', 'bg', 5),
-      badgeClass: getColorClass('blue-500', 'bg', 10) + ' ' + getColorClass('blue-500', 'text')
+      containerClass: getColorClass('blue', 'border', 20) + ' ' + getColorClass('blue', 'bg', 5),
+      badgeClass: getColorClass('blue', 'bg', 10) + ' ' + getColorClass('blue', 'text')
     },
     FileStructureView: {
       icon,
-      containerClass: getColorClass('green-500', 'border', 20) + ' ' + getColorClass('green-500', 'bg', 5),
-      badgeClass: getColorClass('green-500', 'bg', 10) + ' ' + getColorClass('green-500', 'text')
+      containerClass: getColorClass('green', 'border', 20) + ' ' + getColorClass('green', 'bg', 5),
+      badgeClass: getColorClass('green', 'bg', 10) + ' ' + getColorClass('green', 'text')
     },
     Challenge: {
       icon,
-      containerClass: getColorClass('blue-500', 'border', 20) + ' ' + getColorClass('blue-500', 'bg', 5),
-      badgeClass: getColorClass('blue-500', 'bg', 10) + ' ' + getColorClass('blue-500', 'text')
+      containerClass: getColorClass('blue', 'border', 20) + ' ' + getColorClass('blue', 'bg', 5),
+      badgeClass: getColorClass('blue', 'bg', 10) + ' ' + getColorClass('blue', 'text')
     },
     Code: {
       icon,
-      containerClass: getColorClass('cyan-500', 'border', 20) + ' ' + getColorClass('cyan-500', 'bg', 5),
-      badgeClass: getColorClass('cyan-500', 'bg', 10) + ' ' + getColorClass('cyan-500', 'text')
+      containerClass: getColorClass('cyan', 'border', 20) + ' ' + getColorClass('cyan', 'bg', 5),
+      badgeClass: getColorClass('cyan', 'bg', 10) + ' ' + getColorClass('cyan', 'text')
     },
     Markdown: {
       icon,
-      containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
-      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text')
+      containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
+      badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text')
     },
     Media: {
       icon,
-      containerClass: getColorClass('gray-500', 'border', 20) + ' ' + getColorClass('gray-500', 'bg', 5),
-      badgeClass: getColorClass('gray-500', 'bg', 10) + ' ' + getColorClass('gray-500', 'text')
+      containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
+      badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text')
     }
   };
 
@@ -580,7 +591,7 @@ export function ContentBlock(props: ContentBlockProps) {
             <div className="flex gap-2">
               <Badge 
                 variant="default"
-                color={challengeProps.challengeType === 'Project' ? 'purple-500' : 'blue-500'}
+                color={challengeProps.challengeType === 'Project' ? 'purple' : 'blue'}
               >
                 {challengeProps.challengeType === 'Project' ? (
                   <><Rocket className="w-3.5 h-3.5" /> Project</>
@@ -590,14 +601,14 @@ export function ContentBlock(props: ContentBlockProps) {
               </Badge>
               
               <Badge variant="default" color={
-                challengeProps.difficulty === 'Beginner' ? 'green-500' :
-                challengeProps.difficulty === 'Intermediate' ? 'yellow-500' : 'red-500'
+                challengeProps.difficulty === 'Beginner' ? 'green' :
+                challengeProps.difficulty === 'Intermediate' ? 'yellow' : 'red'
               }>
                 {challengeProps.difficulty}
               </Badge>
 
               {challengeProps.estimatedTime && (
-                <Badge variant="outline" color="gray-500">
+                <Badge variant="outline" color="gray">
                   <Clock className="w-3.5 h-3.5" />
                   {challengeProps.estimatedTime}
                 </Badge>
@@ -607,7 +618,7 @@ export function ContentBlock(props: ContentBlockProps) {
             {challengeProps.tech && (
               <div className="flex flex-wrap gap-2">
                 {challengeProps.tech.map((tech, index) => (
-                  <Badge key={index} variant="outline" color="gray-500">
+                  <Badge key={index} variant="outline" color="gray">
                     {tech}
                   </Badge>
                 ))}
@@ -646,6 +657,67 @@ export function ContentBlock(props: ContentBlockProps) {
     }
   };
 
+  const getBlockColor = (props: ContentBlockProps): string => {
+    if (props.type === "Media") {
+      return `text-${mediaTypeConfig[(props as MediaBlockProps).mediaType].badgeClass.split('-')[1]}`;
+    }
+    
+    if (props.type === "Note") {
+      return noteTypeConfig[(props as NoteBlockProps).noteType].iconClass;
+    }
+    
+    if (props.type === "Challenge") {
+      return (props as ChallengeBlockProps).challengeType === "Project" 
+        ? "text-purple-500"
+        : "text-blue-500";
+    }
+    
+    if (props.type === "Generic" && (props as GenericBlockProps).color) {
+      return `text-${(props as GenericBlockProps).color}-500`;
+    }
+    
+    return `text-${defaultBlockColors[props.type]}-500`;
+  };
+
+  const getBlockClassName = (props: ContentBlockProps): string => {
+    // Handle Note blocks
+    if (props.type === "Note") {
+      return noteTypeConfig[(props as NoteBlockProps).noteType]?.containerClass;
+    }
+
+    // Handle Challenge blocks
+    if (props.type === "Challenge") {
+      const color = (props as ChallengeBlockProps).challengeType === "Project" ? "purple" : "blue";
+      return cn(
+        getColorClass(color, 'bg', 5),
+        getColorClass(color, 'border', 20)
+      );
+    }
+
+    // Handle Media blocks
+    if (props.type === "Media") {
+      return mediaTypeConfig[(props as MediaBlockProps).mediaType]?.containerClass;
+    }
+
+    // Handle Generic blocks with custom color
+    if (props.type === "Generic" && (props as GenericBlockProps).color) {
+      const color = (props as GenericBlockProps).color;
+      if (!color) return ''; // Early return if color is undefined
+
+      return cn(
+        getColorClass(color, 'bg', 5),
+        getColorClass(color, 'border', 20)
+      );
+    }
+
+    // Default colors for other block types
+    const defaultColor = defaultBlockColors[props.type];
+    return cn(
+      getColorClass(defaultColor, 'bg', 5),
+      getColorClass(defaultColor, 'border', 20)
+    );
+  };
+
   const blockAttributes = {
     id: blockId,
     'data-block-id': blockId,
@@ -653,19 +725,7 @@ export function ContentBlock(props: ContentBlockProps) {
     'data-show-toc': showOnTOC,
     'data-parent-id': parentId,
     'data-block-icon': config.icon.displayName || config.icon.name || 'Box',
-    'data-block-color': props.type === "Media" 
-      ? `text-${mediaTypeConfig[(props as MediaBlockProps).mediaType].badgeClass.split('-')[1]}`
-      : props.type === "Note" 
-      ? noteTypeConfig[(props as NoteBlockProps).noteType].iconClass
-      : props.type === "Challenge"
-      ? (props as ChallengeBlockProps).challengeType === "Project" 
-        ? "text-purple-500"
-        : "text-blue-500"
-      : props.type === "FileStructureView"
-      ? "text-green-500"
-      : props.type === "Generic" && (props as GenericBlockProps).color
-      ? `text-${(props as GenericBlockProps).color}-500`
-      : config.badgeClass.split(' ')[1],
+    'data-block-color': getBlockColor(props),
     ...(props.type === "Note" && {
       'data-note-type': (props as NoteBlockProps).noteType,
       'data-note-icon': noteTypeConfig[(props as NoteBlockProps).noteType].icon.name
@@ -676,16 +736,8 @@ export function ContentBlock(props: ContentBlockProps) {
     className: cn(
       'content-block',
       props.type !== "Classic" && "border-2 p-6 backdrop-blur-sm rounded-lg",
-      {
-        [noteTypeConfig[(props as NoteBlockProps).noteType]?.containerClass]: props.type === "Note",
-        'bg-green-500/5 border-green-500/20': props.type === "FileStructureView",
-        [config.containerClass]: props.type !== "Classic" && props.type !== "Note" && props.type !== "FileStructureView",
-        'border-purple-500/20': props.type === "Challenge" && (props as ChallengeBlockProps).challengeType === "Project",
-        'border-blue-500/20': props.type === "Challenge" && (props as ChallengeBlockProps).challengeType !== "Project",
-        [mediaTypeConfig[(props as MediaBlockProps).mediaType]?.containerClass]: 
-          props.type === "Media",
-      },
-      props.className
+      getBlockClassName(props),
+      props.className // Keep this at the end to allow overrides
     ),
     style: {
       '--block-depth': parentId ? '1' : '0'
@@ -696,6 +748,7 @@ export function ContentBlock(props: ContentBlockProps) {
 
   return (
     <section {...blockAttributes}>
+    {/* <section className="content-block border-2 p-6 backdrop-blur-sm rounded-lg border-gray-500/20 bg-gray-500/5">  */}
       {/* Header */}
       <div className="flex w-full items-start justify-between gap-4">
         <div className="space-y-4 flex-1">

@@ -59,56 +59,6 @@ const getBlockDepth = (element: Element): number => {
   return depth;
 };
 
-const getBlockIcon = (type: string, mediaType?: MediaType): LucideIcon => {
-  if (type === "Media" && mediaType) {
-    return mediaTypeConfig[mediaType].icon;
-  }
-
-  // Default icons for other block types
-  switch (type) {
-    case "Classic":
-      return lucideIcons.Layout;
-    case "Generic":
-      return lucideIcons.Box;
-    case "Note":
-      return lucideIcons.AlertCircle;
-    case "FileStructureView":
-      return lucideIcons.FolderTree;
-    case "Challenge":
-      return lucideIcons.Target;
-    case "Code":
-      return lucideIcons.Code;
-    case "Markdown":
-      return lucideIcons.FileText;
-    default:
-      return lucideIcons.Box;
-  }
-};
-
-const getBlockColor = (type: string, mediaType?: MediaType): string => {
-  if (type === "Media" && mediaType) {
-    const colorClass = mediaTypeConfig[mediaType].badgeClass.split(' ')[1];
-    return colorClass;
-  }
-  
-  switch (type) {
-    case "Classic":
-    case "Generic":
-    case "Markdown":
-      return "text-gray-500";
-    case "Note":
-      return "text-blue-500";
-    case "FileStructureView":
-      return "text-green-500";
-    case "Challenge":
-      return "text-blue-500";
-    case "Code":
-      return "text-cyan-500";
-    default:
-      return "text-gray-500";
-  }
-};
-
 export function TableOfContents({ className }: TableOfContentsProps) {
   const [tocItems, setTocItems] = useState<TOCItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
