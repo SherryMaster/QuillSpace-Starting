@@ -7,12 +7,7 @@ export const BASE_COLORS = {
   destructive: 'destructive'
 } as const;
 
-export type BaseColor = 
-  | 'primary'
-  | 'secondary'
-  | 'accent'
-  | 'muted'
-  | 'destructive';
+export type BaseColor = keyof typeof BASE_COLORS;
 
 export const BRAND_COLORS = {
   blue: 'blue',
@@ -28,61 +23,10 @@ export const BRAND_COLORS = {
   pink: 'pink',
   indigo: 'indigo',
   teal: 'teal',
-  rose: 'rose',
-  lime: 'lime',
-  sky: 'sky',
-  emerald: 'emerald',
-  fuchsia: 'fuchsia',
-  amber: 'amber',
-  violet: 'violet'
+  brown: 'brown'
 } as const;
 
-export type BrandColor = 
-  | 'blue'
-  | 'red'
-  | 'green'
-  | 'yellow'
-  | 'purple'
-  | 'gray'
-  | 'dark'
-  | 'light'
-  | 'cyan'
-  | 'orange'
-  | 'pink'
-  | 'indigo'
-  | 'teal'
-  | 'rose'
-  | 'lime'
-  | 'sky'
-  | 'emerald'
-  | 'fuchsia'
-  | 'amber'
-  | 'violet';
-
-export const COLOR_SHADES = {
-  '50': '50',
-  '100': '100',
-  '200': '200',
-  '300': '300',
-  '400': '400',
-  '500': '500',
-  '600': '600',
-  '700': '700',
-  '800': '800',
-  '900': '900'
-} as const;
-
-export type ColorShade = 
-  | '50' 
-  | '100' 
-  | '200' 
-  | '300' 
-  | '400' 
-  | '500' 
-  | '600' 
-  | '700' 
-  | '800' 
-  | '900';
+export type BrandColor = keyof typeof BRAND_COLORS;
 
 export type ColorIntent = 
   | 'bg' 
@@ -92,8 +36,10 @@ export type ColorIntent =
   | 'fill' 
   | 'stroke';
 
-// Composite types
-export type ColorToken = `${BaseColor | BrandColor}-${ColorShade}`;
+// Simplified ColorToken is now just the color name
+export type ColorToken = BaseColor | BrandColor;
+
+// ColorClass now includes the default shade
 export type ColorClass = `${ColorIntent}-${ColorToken}`;
 
 // Opacity utilities
@@ -112,10 +58,8 @@ export interface ThemeColors {
 
 // Type guards and validation
 export const isValidColorToken = (color: string): color is ColorToken => {
-  const [base, shade] = color.split('-');
   return (
-    (Object.values(BASE_COLORS).includes(base as BaseColor) ||
-    Object.values(BRAND_COLORS).includes(base as BrandColor)) &&
-    Object.values(COLOR_SHADES).includes(shade as ColorShade)
+    Object.values(BASE_COLORS).includes(color as BaseColor) ||
+    Object.values(BRAND_COLORS).includes(color as BrandColor)
   );
 };

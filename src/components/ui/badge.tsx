@@ -2,6 +2,7 @@ import * as React from "react"
 import { cva } from "class-variance-authority"
 import { cn } from "@/utils/common"
 import { ColorToken } from '@/types/colors'
+import { getColorClass } from '@/utils/colors'
 
 interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'outline'
@@ -15,7 +16,6 @@ const badgeVariants = cva(
       variant: {
         default: "border-transparent bg-primary/10 text-primary hover:bg-primary/20",
         outline: "border-2 bg-background hover:bg-accent",
-        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
       },
     },
     defaultVariants: {
@@ -31,8 +31,8 @@ const Badge = ({
   ...props
 }: BadgeProps) => {
   const colorClasses = color ? {
-    'default': `bg-${color}/10 text-${color} hover:bg-${color}/20`,
-    'outline': `border-${color}/20 text-${color} hover:bg-${color}/10`,
+    'default': `${getColorClass(color, 'bg', 10)} ${getColorClass(color, 'text')} hover:${getColorClass(color, 'bg', 20)}`,
+    'outline': `${getColorClass(color, 'border', 20)} ${getColorClass(color, 'text')} hover:${getColorClass(color, 'bg', 10)}`,
   }[variant] : '';
 
   return (

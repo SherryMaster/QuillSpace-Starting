@@ -46,13 +46,12 @@ function App() {
         </ContentBlock>
         <ContentBlock 
           type="Generic" 
-          title="Generic Block" 
+          title="Generic Block"
         >
           <p>This is a generic block.</p>
         </ContentBlock>
 
-        <ContentBlock type="Note" title="Important Note" noteType="warning" content="This is a primary note.">
-          <p>This is a note with a custom icon.</p>
+        <ContentBlock type="Note" title="Important Note" noteType="critical" content="This is a critical note.">
         </ContentBlock>
 
         <ContentBlock type="FileStructureView" title="Project Structure" filestructure={{
