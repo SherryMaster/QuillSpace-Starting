@@ -303,9 +303,11 @@ export function MediaBlock({
       mediaTypeConfig[mediaType].containerClass,
       status === 'loading' && mediaTypeConfig[mediaType].loadingAnimation
     )}>
-      {status === 'loading' && <LoadingAnimation type={mediaType} />}
-      {status === 'error' && <ErrorDisplay onRetry={handleRetry} />}
-      {renderMedia()}
+      <div className="relative">
+        {renderMedia()}
+        {status === 'loading' && <LoadingAnimation type={mediaType} />}
+        {status === 'error' && <ErrorDisplay onRetry={handleRetry} />}
+      </div>
       {mediaType === 'Video' && parsedTimestamps.length > 0 && (
         <VideoTimestamps 
           timestamps={parsedTimestamps}
