@@ -1,7 +1,6 @@
 import './App.css'
 import { ContentBlock } from "./components/contentblock/ContentBlock";
 import { ThemedInteractiveContentLayout } from "./components/layout/ThemedInteractiveContentLayout";
-import { removeCommonIndentation } from "./utils/common";
 
 function App() {
   return (
