@@ -34,7 +34,9 @@ export type ColorIntent =
   | 'border' 
   | 'ring' 
   | 'fill' 
-  | 'stroke';
+  | 'stroke'
+  | 'scrollbar-track'
+  | 'scrollbar-thumb';
 
 // Simplified ColorToken is now just the color name
 export type ColorToken = BaseColor | BrandColor;
