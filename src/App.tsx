@@ -7,7 +7,7 @@ function App() {
   return (
     <ThemedInteractiveContentLayout
       title="The Ultimate 'QuillSpace' Guide"
-      titleBG="dark"
+      titleBG="indigo"
       subtitle="A comprehensive guide to creating interactive documentation with the Notes framework."
       emphasizedColors="blue"
     >
