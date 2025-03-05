@@ -5,6 +5,7 @@ import { MediaBlockProps, MediaType, MultiVideoBlockProps, SingleVideoBlockProps
 import { parseTimestamps, convertToYouTubeEmbedURL } from '@/utils/videoUtils';
 import { VideoTimestamps } from './VideoTimestamps';
 import { VideoNavigation } from './VideoNavigation';
+import { useVideoProgress } from '@/hooks/useVideoProgress';
 
 interface LoadingAnimationProps {
   type: MediaType;
@@ -85,6 +86,7 @@ interface YouTubePlayer {
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
   getCurrentTime: () => number;
   getPlayerState: () => number;
+  getDuration: () => number;
   destroy: () => void;
 }
 
@@ -140,17 +142,41 @@ export function MediaBlock({
   const handleNext = () => {
     if (isTransitioning || !multiVideo) return;
     setIsTransitioning(true);
+    
+    // Save progress for current video before switching
+    if (playerRef.current) {
+      const player = playerRef.current;
+      saveProgress(
+        player.getCurrentTime(),
+        player.getDuration(),
+        multiVideo.titles[currentVideoIndex]
+      );
+    }
+    
+    stopProgressSaving();
     setCurrentTime(0);
     setCurrentVideoIndex((prev) => (prev + 1) % multiVideo.urls.length);
-    setTimeout(() => setIsTransitioning(false), 300); // Add a small delay for transition
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const handlePrev = () => {
     if (isTransitioning || !multiVideo) return;
     setIsTransitioning(true);
+    
+    // Save progress for current video before switching
+    if (playerRef.current) {
+      const player = playerRef.current;
+      saveProgress(
+        player.getCurrentTime(),
+        player.getDuration(),
+        multiVideo.titles[currentVideoIndex]
+      );
+    }
+    
+    stopProgressSaving();
     setCurrentTime(0);
     setCurrentVideoIndex((prev) => (prev - 1 + multiVideo.urls.length) % multiVideo.urls.length);
-    setTimeout(() => setIsTransitioning(false), 300); // Add a small delay for transition
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const [status, setStatus] = useState<'loading' | 'error' | 'loaded'>('loading');
@@ -159,6 +185,15 @@ export function MediaBlock({
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | HTMLImageElement | null>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  const {
+    savedPosition,
+    actions: {
+      saveProgress,
+      startProgressSaving,
+      stopProgressSaving
+    }
+  } = useVideoProgress(currentUrl);
 
   // Process YouTube URL if needed
   const processedUrl = useMemo(() => {
@@ -182,12 +217,19 @@ export function MediaBlock({
         try {
           const urlObj = new URL(processedUrl);
           const videoId = urlObj.pathname.split('/').pop();
-          const clip = urlObj.searchParams.get('clip');
-          const clipt = urlObj.searchParams.get('clipt');
           
-          if (!videoId) return;
+          if (!videoId || !window.YT) return;
           
-          if (!window.YT) return;
+          interface YTPlayerEvent {
+            target: YouTubePlayer & {
+              getDuration: () => number;
+              getVideoData: () => { title: string };
+            };
+          }
+
+          interface YTStateChangeEvent extends YTPlayerEvent {
+            data: number;
+          }
           
           playerRef.current = new window.YT.Player(playerContainerRef.current!, {
             videoId,
@@ -195,29 +237,57 @@ export function MediaBlock({
               modestbranding: 1,
               rel: 0,
               controls: 1,
-              ...(clip && clipt ? { clip, clipt } : {})
+              start: Math.floor(savedPosition || 0)
             },
             events: {
-              onReady: () => {
+              onReady: (event: YTPlayerEvent) => {
                 setStatus('loaded');
-                
-                // Start time tracking
-                const timeUpdateInterval = setInterval(() => {
-                  if (playerRef.current) {
-                    const time = playerRef.current.getCurrentTime();
-                    setCurrentTime(time);
-                  }
-                }, 200);
+                const player = event.target;
+                const duration = player.getDuration();
+                const title = player.getVideoData().title;
 
-                return () => clearInterval(timeUpdateInterval);
+                // Start progress tracking
+                const updateProgress = () => {
+                  const currentTime = player.getCurrentTime();
+                  saveProgress(currentTime, duration, title);
+                  startProgressSaving(currentTime, duration, title);
+                };
+
+                // Initial progress save
+                updateProgress();
+
+                // Set up interval for regular progress updates
+                const progressInterval = setInterval(updateProgress, 5000);
+
+                // Cleanup interval on player destroy
+                const originalDestroy = player.destroy;
+                player.destroy = () => {
+                  clearInterval(progressInterval);
+                  originalDestroy.call(player);
+                };
               },
-              onStateChange: (event: { data: any; }) => {
-                if (window.YT?.PlayerState && event.data === window.YT.PlayerState.PLAYING) {
-                  setStatus('loaded');
+              onStateChange: (event: YTStateChangeEvent) => {
+                if (window.YT?.PlayerState) {
+                  const player = event.target;
+                  const currentTime = player.getCurrentTime();
+                  const duration = player.getDuration();
+                  const title = player.getVideoData().title;
+
+                  if (event.data === window.YT.PlayerState.PLAYING) {
+                    setStatus('loaded');
+                    startProgressSaving(currentTime, duration, title);
+                  } else if (
+                    event.data === window.YT.PlayerState.PAUSED ||
+                    event.data === window.YT.PlayerState.ENDED
+                  ) {
+                    stopProgressSaving();
+                    saveProgress(currentTime, duration, title);
+                  }
                 }
               },
               onError: () => {
                 setStatus('error');
+                stopProgressSaving();
               }
             }
           });
@@ -234,13 +304,14 @@ export function MediaBlock({
       }
 
       return () => {
+        stopProgressSaving();
         if (playerRef.current) {
           playerRef.current.destroy();
           playerRef.current = null;
         }
       };
     }
-  }, [mediaType, processedUrl]);
+  }, [mediaType, processedUrl, savedPosition, saveProgress, startProgressSaving, stopProgressSaving]);
 
   useEffect(() => {
     if (timestamps && mediaType === 'Video') {
