@@ -1,6 +1,6 @@
 import './App.css'
 import Greet from './Quill/ReactFundamentals/Greet';
-import { jvascript_timestamps, react_part_1_timestamps, react_part_2_timestamps, react_part_3_timestamps, react_part_4_timestamps, typescript_timestamps } from './Quill/timestamps';
+import { javascript_dsa_timestamps, jvascript_timestamps as javascript_timestamps, react_part_1_timestamps, react_part_2_timestamps, react_part_3_timestamps, react_part_4_timestamps, typescript_timestamps } from './Quill/timestamps';
 import { ContentBlock } from "./components/contentblock/ContentBlock";
 import { ThemedInteractiveContentLayout } from "./components/layout/ThemedInteractiveContentLayout";
 
@@ -22,6 +22,7 @@ function App() {
         multiVideo={{
           urls: [
             'https://www.youtube.com/watch?v=H3XIJYEPdus',
+            'https://www.youtube.com/watch?v=wBtPGnVnA9g',
             'https://www.youtube.com/watch?v=zeCDuo74uzA',
             'https://www.youtube.com/watch?v=qnwFpjIqsrA',
             'https://www.youtube.com/watch?v=futeaowy34Y',
@@ -30,6 +31,7 @@ function App() {
           ],
           titles: [
             'JavaScript Complete Course',
+            'JavaScript DSA Complete Course',
             'TypeScript Complete Course',
             'React Mastery (Part 1/4)',
             'React Mastery (Part 2/4)',
@@ -37,7 +39,8 @@ function App() {
             'React Mastery (Part 4/4)',
           ],
           timestamps: [
-            jvascript_timestamps,
+            javascript_timestamps,
+            javascript_dsa_timestamps,
             typescript_timestamps,
             react_part_1_timestamps,
             react_part_2_timestamps,

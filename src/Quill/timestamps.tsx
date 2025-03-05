@@ -38,28 +38,28 @@ export const jvascript_timestamps = `
 5:23:29 - Rest Operator
 5:30:23 - Array Destructuring
 5:44:37 - Object Destructuring
-5:43:59 - Advanced Destructuring
-5:49:40 - Function Destructuring
-5:56:16 - Nested Destructuring
-5:58:09 - Destructuring Craziness
-6:03:32 - Ternary Operator
-6:10:36 - For-In Loop
-6:14:36 - For-Of Loop
-6:17:53 - forEach Method
-6:26:43 - map Helper
-6:33:01 - filter Helper
-6:40:23 - find Helper
-6:47:52 - every & some Helpers
-6:57:22 - reduce Helper
-7:14:02 - Map Data Structure
-7:24:07 - Sets Data Structure
-7:31:23 - Symbols in JavaScript
-7:40:10 - Introduction to DOM
-7:42:37 - DOM Setup
-7:43:36 - Accessing DOM Elements
-8:12:22 - Manipulating Text Content
-8:23:13 - Managing Classes
-8:30:42 - Working with Attributes
+5:51:43 - Advanced Destructuring
+5:55:47 - Function Destructuring
+6:02:24 - Nested Destructuring
+6:05:09 - Destructuring Craziness
+6:09:39 - Ternary Operator
+6:16:44 - For-In Loop
+6:20:46 - For-Of Loop
+6:24:04 - forEach Method
+6:32:48 - map Helper
+6:39:10 - filter Helper
+6:46:32 - find Helper
+6:54:00 - every & some Helpers
+7:03:30 - reduce Helper
+7:20:10 - Map Data Structure
+7:30:17 - Sets Data Structure
+7:37:33 - Symbols in JavaScript
+7:46:17 - Introduction to DOM
+7:48:42 - DOM Setup
+7:50:48 - Accessing DOM Elements
+8:18:27 - Manipulating Text Content
+8:29:19 - Managing Classes
+8:36:48 - Working with Attributes
 8:42:07 - Navigating Siblings
 8:50:52 - Modifying Styles
 8:59:23 - Creating DOM Elements
@@ -111,6 +111,106 @@ export const jvascript_timestamps = `
 15:04:32 - Fetching Data from APIs
 15:18:31 - Error Handling
 15:22:43 - Outro
+`
+
+export const javascript_dsa_timestamps = `
+
+00:00 - Intro
+00:42 - What is DSA
+3:53 - Course Requirements
+4:40 - Course Setup
+6:46 - Solving the first problem
+10:07 - Why Should I Care
+10:58 - What is bigO
+13:48 - O(n)
+20:11 - O(1)
+23:48 - O(n^2)
+29:37 - O(log n)
+33:55 - DS Arrays
+34:26 - What is DS Array
+36:05 - Creating Custom Array
+37:42 - Custom Push Method
+41:20 - Custom Get Method
+43:05 - Custom Pop Method
+46:30 - Custom Shift Method
+51:17 - Custom DeleteByIndex Method
+54:35 - Reverse String
+59:31 - Palindromes
+1:02:30 - Reverse Integer
+1:05:57 - Sentence Capitalization
+1:10:23 - FizzBuzz
+1:14:06 - Max Profit 
+1:20:41 - Array Chunks
+1:26:18 - Two Sum ( ugly code )
+1:30:01 - What is Linked List
+1:33:01 - How the Linked List Looks Like
+1:36:05 - Creating Our First Linked List
+1:40:01 - Linked List Push Method
+1:45:24 - Linked List Pop Method
+1:52:42 - Linked List Unshift Method
+1:56:51 - Linked List Shift Method
+1:59:44 - Linked List GET FIRST Method
+2:00:53 - Linked List GET LAST Method
+2:03:05 - Linked List GET ELEMENT BY INDEX Method
+2:06:15 - Linked List SET Method
+2:10:33 - Linked List INSERT Method
+2:17:31 - Linked List SIZE Method
+2:19:18 - Linked List CLEAR Method
+2:20:17 - What is Doubly Linked List
+2:21:34 - Create Your First Doubly Linked List
+2:23:06 - Doubly Linked List Push Method
+2:26:43 - Doubly Linked List Pop Method
+2:30:47 - Doubly Linked List Unshift Method
+2:34:43 - Doubly Linked List Shift Method
+2:37:38 - Reverse Linked List
+2:45:32 - Stack & Queues
+2:46:20 - What is a Stack
+2:49:36 - Creating Our First Stack
+2:52:01 - Stack Push Method
+2:55:29 - Stack Pop Method
+2:58:49 - What is Queue
+3:00:38 - Queues Enqueue Method
+3:06:14 - Queues Dequeue Method
+3:09:36 - Queues Min Method
+3:14:22 - isValidParenthesis
+3:19:05 - Reverse String Using Stack
+3:22:08 - Hash Tables
+3:22:21 - What is a Hash Table
+3:23:30 - What is a Hash Function
+3:24:29 - How Hash Table Looks Like
+3:26:11 - Creating Our First Hash Table
+3:29:27 - Hash Table Set Method
+3:34:02 - Hash Table Get Method
+3:38:37 - Get All Keys & Values
+3:43:01 - Word Counter
+3:47:15 - Two Sum ( refactor )
+3:51:06 - What is a Tree
+3:55:36 - BST
+4:00:27 - Creating Our First Binary Search Tree
+4:02:15 - Binary Search Tree Insert Method
+4:08:36 - Binary Search Tree Includes Method
+4:15:42 - What is Recursion
+4:17:11 - Recursion Count Down
+4:20:19 - Recursion Factorial
+4:23:11 - Tree Traversal ( Breath First Search )
+4:31:56 - Tree Traversal ( Depth First Search PreOrder )
+4:41:41 - Tree Traversal ( Depth First Search PostOrder )
+4:50:32 - What is a Graph
+4:55:38 - Creating Our First Graph
+4:56:23 - Add Vertex To Graph
+4:58:36 - Add Edges To Graph
+5:01:21 - Remove Edges From Graph
+5:04:50 - Remove Vertex From Graph
+5:09:33 - What is Bubble Sort
+5:12:03 - Creating Bubble Sort
+5:15:06- What is Selection Sort
+5:19:33 - Creating Selection Sort
+5:22:20 - What is Insertion Sort
+5:24:48 - Creating Insertion Sort
+5:27:18 - What is Merge Sort
+5:29:15 - Creating Merge
+5:35:44 - Creating Merge Sort
+5:38:32 - Outro
 `
 
 export const typescript_timestamps = `
