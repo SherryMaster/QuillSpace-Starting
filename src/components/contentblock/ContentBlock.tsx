@@ -23,7 +23,8 @@ import {
   Film,
   Music,
   Image as ImageIcon,
-  Play
+  Play,
+  Book
 } from "lucide-react";
 import { FileStructureView } from './FileStructureView';
 import { CodeHighlighter } from "./CodeHighlighter";
@@ -36,6 +37,7 @@ import { getColorClass } from '@/utils/colors';
 import type { MediaType, VideoBlockProps } from '@/types/media';
 import { MediaBlock } from './MediaBlock';
 import { removeCommonIndentation } from "@/utils/common";
+import { GlossaryBlock } from './GlossaryBlock';
 
 const defaultBlockColors = {
   Classic: 'gray',
@@ -45,7 +47,8 @@ const defaultBlockColors = {
   Challenge: 'blue',
   Code: 'cyan',
   Markdown: 'gray',
-  Media: 'purple'
+  Media: 'purple',
+  Glossary: 'purple',
 } as const;
 
 export const mediaTypeConfig: Record<MediaType, {
@@ -115,10 +118,11 @@ export interface BaseBlockProps {
   showOnTOC?: boolean;
   iconConfig?: IconConfig;
   className?: string;
+  color?: ColorToken; // Add color option to base props
 }
 
 // Update ClassicBlockProps
-interface ClassicBlockProps extends BaseBlockProps {
+interface ClassicBlockProps extends Omit<BaseBlockProps, 'color'> {
   type: "Classic";
   features?: boolean;
   parentId?: string;
@@ -127,7 +131,7 @@ interface ClassicBlockProps extends BaseBlockProps {
 // Generic extends Classic with color options
 interface GenericBlockProps extends Omit<ClassicBlockProps, "type"> {
   type: "Generic";
-  color?: ColorToken;
+  color?: ColorToken;  // Add the color property
 }
 
 // All other blocks extend Generic
@@ -174,6 +178,23 @@ interface MediaBlockProps extends BaseBlockProps {
   controls?: boolean;
 }
 
+interface GlossaryBlockProps extends BaseBlockProps {
+  type: "Glossary";
+  dictionary: Record<string, string | {
+    definition: string;
+    category?: string;
+    tags?: string[];
+  }>;
+  layout?: 'grid' | 'list' | 'cards';
+  searchPlaceholder?: string;
+  initialSort?: 'asc' | 'desc';
+  showCategories?: boolean;
+  showTags?: boolean;
+  searchBarPosition?: 'top' | 'sticky';
+  animateEntries?: boolean;
+  groupByCategory?: boolean;
+}
+
 export type ContentBlockProps = 
   | ClassicBlockProps 
   | GenericBlockProps 
@@ -183,7 +204,8 @@ export type ContentBlockProps =
   | CodeBlockProps
   | MarkdownBlockProps
   | VideoBlockProps  
-  | MediaBlockProps;
+  | MediaBlockProps
+  | GlossaryBlockProps;
 
 const noteTypeConfig: Record<NoteBlockProps['noteType'], {
     containerClass: string;
@@ -261,6 +283,7 @@ const DEFAULT_BLOCK_ICONS: Record<ContentBlockProps["type"], LucideIcon | ((prop
     }
     return Film;  // Default to Film icon if type check fails
   },
+  Glossary: Book,
 };
 
 const getBlockIcon = (props: ContentBlockProps): LucideIcon => {
@@ -325,6 +348,11 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
       icon,
       containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
       badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text')
+    },
+    Glossary: {
+      icon,
+      containerClass: getColorClass('purple', 'border', 20) + ' ' + getColorClass('purple', 'bg', 5),
+      badgeClass: getColorClass('purple', 'bg', 10) + ' ' + getColorClass('purple', 'text')
     },
     Note: {
       icon,
@@ -676,8 +704,11 @@ export function ContentBlock(props: ContentBlockProps) {
         : "text-blue-500";
     }
     
-    if (props.type === "Generic" && (props as GenericBlockProps).color) {
-      return `text-${(props as GenericBlockProps).color}-500`;
+    if (props.type === "Generic") {
+      const genericProps = props as GenericBlockProps;
+      if (genericProps.color) {
+        return `text-${genericProps.color}-500`;
+      }
     }
     
     return `text-${defaultBlockColors[props.type]}-500`;
@@ -708,18 +739,15 @@ export function ContentBlock(props: ContentBlockProps) {
       return mediaTypeConfig[(props as MediaBlockProps).mediaType]?.containerClass;
     }
 
-    // Handle Generic blocks with custom color
-    if (props.type === "Generic" && (props as GenericBlockProps).color) {
-      const color = (props as GenericBlockProps).color;
-      if (!color) return ''; // Early return if color is undefined
-
+    // Handle custom colors for all non-Classic blocks
+    if (props.color) {
       return cn(
-        getColorClass(color, 'bg', 5),
-        getColorClass(color, 'border', 20)
+        getColorClass(props.color, 'bg', 5),
+        getColorClass(props.color, 'border', 20)
       );
     }
 
-    // Default colors for other block types
+    // Default colors for block types
     const defaultColor = defaultBlockColors[props.type];
     return cn(
       getColorClass(defaultColor, 'bg', 5),
@@ -890,6 +918,12 @@ export function ContentBlock(props: ContentBlockProps) {
               type="Media"
               title={props.title}
               timestamps={(props as MediaBlockProps).timestamps ? removeCommonIndentation((props as MediaBlockProps).timestamps as string) : undefined}
+            />
+          )}
+
+          {props.type === "Glossary" && (
+            <GlossaryBlock 
+              {...props as GlossaryBlockProps} // Forward all props instead of just dictionary and title
             />
           )}
 
