@@ -47,7 +47,6 @@ function App() {
       <ContentBlock
         title='1: React Fundamentals'
         type="Classic"
-        features
       >
         <ContentBlock
           title='What is React?'
@@ -56,6 +55,9 @@ function App() {
           content="React is a JavaScript library for building user interfaces. It is maintained by Facebook and a community of individual developers and companies. React can be used as a base in the development of single-page or mobile applications."
         />
       </ContentBlock>
+      <p className="text-2xl bg-blue-800/40 p-4 rounded-2xl">React is a free and <span className="font-extrabold">open source</span> JavaScript <span className="font-extrabold">library</span> for building <span className="font-extrabold">user interfaces (UIs)</span>.</p>
+
+
     </ThemedInteractiveContentLayout>
   );
 }
