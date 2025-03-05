@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Play, Image as ImageIcon, Film, Music, LucideIcon, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/utils/common';
-import { MediaBlockProps, MediaType, VideoTimestamp, VideoBlockProps } from '@/types/media';
+import { MediaBlockProps, MediaType, VideoBlockProps } from '@/types/media';
 import { parseTimestamps, convertToYouTubeEmbedURL } from '@/utils/videoUtils';
 import { VideoTimestamps } from './VideoTimestamps';
+import { VideoNavigation } from './VideoNavigation';
 
 interface LoadingAnimationProps {
   type: MediaType;
@@ -85,33 +86,61 @@ declare global {
 }
 
 export function MediaBlock({ 
-  url, 
+  url = '', 
+  title = '', 
   mediaType, 
-  aspectRatio, 
-  timestamps = (mediaType === 'Video' ? '' : undefined),
-  timestampsColor, // Add this new prop
+  aspectRatio,
+  className, // Add this line to include className in props destructuring
   ...props 
-}: MediaBlockProps & Partial<Pick<VideoBlockProps, 'timestamps' | 'timestampsColor'>>) {  
+}: MediaBlockProps) {
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Extract video-specific props safely
+  const videoProps = props as VideoBlockProps;
+  const { timestamps, timestampsColor, multiVideo } = videoProps;
+
+  // Get current URL and timestamps based on multiVideo state
+  const currentUrl = multiVideo ? multiVideo.urls[currentVideoIndex] : url;
+  const currentTimestamps = multiVideo ? multiVideo.timestamps?.[currentVideoIndex] : timestamps;
+
+  // Add navigation controls if needed
+  const showNavigation = multiVideo && multiVideo.urls.length > 1;
+
+  const handleNext = () => {
+    if (isTransitioning || !multiVideo) return;
+    setIsTransitioning(true);
+    setCurrentTime(0);
+    setCurrentVideoIndex((prev) => (prev + 1) % multiVideo.urls.length);
+    setTimeout(() => setIsTransitioning(false), 300); // Add a small delay for transition
+  };
+
+  const handlePrev = () => {
+    if (isTransitioning || !multiVideo) return;
+    setIsTransitioning(true);
+    setCurrentTime(0);
+    setCurrentVideoIndex((prev) => (prev - 1 + multiVideo.urls.length) % multiVideo.urls.length);
+    setTimeout(() => setIsTransitioning(false), 300); // Add a small delay for transition
+  };
+
   const [status, setStatus] = useState<'loading' | 'error' | 'loaded'>('loading');
   const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | HTMLImageElement | null>(null);
-  const [parsedTimestamps, setParsedTimestamps] = useState<VideoTimestamp[]>([]);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
   // Process YouTube URL if needed
   const processedUrl = useMemo(() => {
-    if (mediaType === 'Video' && (url.includes('youtube.com') || url.includes('youtu.be'))) {
-      return convertToYouTubeEmbedURL(url);
+    if (mediaType === 'Video' && currentUrl && (currentUrl.includes('youtube.com') || currentUrl.includes('youtu.be'))) {
+      return convertToYouTubeEmbedURL(currentUrl);
     }
-    return url;
-  }, [url, mediaType]);
+    return currentUrl;
+  }, [currentUrl, mediaType]);
 
   // Initialize YouTube API
   useEffect(() => {
-    if (mediaType === 'Video' && processedUrl.includes('youtube.com/embed/')) {
-      // Load YouTube API if not already loaded
+    if (mediaType === 'Video' && processedUrl && processedUrl.includes('youtube.com/embed/')) {
       if (!window.YT) {
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
@@ -119,7 +148,6 @@ export function MediaBlock({
         firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
       }
 
-      // Initialize player when API is ready
       const initPlayer = () => {
         try {
           const urlObj = new URL(processedUrl);
@@ -186,8 +214,7 @@ export function MediaBlock({
 
   useEffect(() => {
     if (timestamps && mediaType === 'Video') {
-      const parsed = parseTimestamps(timestamps);
-      setParsedTimestamps(parsed);
+      parseTimestamps(timestamps); // Remove setParsedTimestamps since it's not needed
     }
   }, [timestamps, mediaType]);
 
@@ -246,7 +273,7 @@ export function MediaBlock({
   const renderMedia = () => {
     switch (mediaType) {
       case 'Video':
-        if (processedUrl.includes('youtube.com/embed/')) {
+        if (processedUrl?.includes('youtube.com/embed/')) {
           return renderYouTubeVideo();
         }
         // For other videos
@@ -303,7 +330,7 @@ export function MediaBlock({
           <img
             ref={mediaRef as React.RefObject<HTMLImageElement>}
             src={url}
-            alt={props.title || 'Media content'}
+            alt={title || 'Media content'} // Use the title from props directly
             className="w-full h-full object-contain"
             onLoad={() => setStatus('loaded')}
             onError={() => setStatus('error')}
@@ -314,24 +341,39 @@ export function MediaBlock({
     }
   };
 
+  // Get current video title if available
+  const currentVideoTitle = multiVideo?.titles?.[currentVideoIndex];
+
   return (
-    <div className={cn(
-      'relative overflow-hidden rounded-lg',
-      mediaTypeConfig[mediaType].containerClass,
-      status === 'loading' && mediaTypeConfig[mediaType].loadingAnimation
-    )}>
-      <div className="relative">
+    <div className={cn("space-y-4", className)}>
+      {showNavigation && (
+        <VideoNavigation
+          onNext={handleNext}
+          onPrev={handlePrev}
+          currentIndex={currentVideoIndex}
+          total={multiVideo?.urls.length || 1}
+          isTransitioning={isTransitioning}
+          videoTitle={currentVideoTitle}  // Only pass the current video title
+        />
+      )}
+      
+      <div className={cn(
+        "relative overflow-hidden rounded-lg",
+        mediaTypeConfig[mediaType].containerClass,
+        status === 'loading' && mediaTypeConfig[mediaType].loadingAnimation
+      )}>
         {renderMedia()}
         {status === 'loading' && <LoadingAnimation type={mediaType} />}
         {status === 'error' && <ErrorDisplay onRetry={handleRetry} />}
       </div>
-      {mediaType === 'Video' && parsedTimestamps.length > 0 && (
+
+      {mediaType === 'Video' && currentTimestamps && currentTimestamps.length > 0 && (
         <div className="mt-4">
           <VideoTimestamps
-            timestamps={parsedTimestamps}
+            timestamps={parseTimestamps(currentTimestamps)}
             onTimestampClick={handleTimestampClick}
             currentTime={currentTime}
-            color={timestampsColor || "purple"} // Use the new prop here, fallback to default
+            color={timestampsColor || "purple"}
           />
         </div>
       )}
