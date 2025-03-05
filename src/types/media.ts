@@ -9,6 +9,22 @@ export interface VideoTimestamp {
   formattedTime: string; // HH:MM:SS format
 }
 
+// Define literal union type for valid YouTube URL patterns
+export type YouTubeURLPattern = 
+  | `https://www.youtube.com/watch?v=${string}`
+  | `https://youtu.be/${string}`
+  | `https://www.youtube.com/embed/${string}`
+  | `https://youtube.com/watch?v=${string}`
+  | `https://youtube.com/clip/${string}`
+  | `https://www.youtube.com/clip/${string}`;
+
+// Replace the branded type with a template literal type
+export type YouTubeURL = YouTubeURLPattern;
+
+// Remove function declaration since implementation exists in videoUtils.ts
+// If you need to export the type, use:
+export type ConvertToYouTubeEmbedURL = (url: YouTubeURL) => string;
+
 // Base Media Block Props (remove url from here)
 interface BaseMediaBlockProps extends BaseBlockProps {
   type: "Media";
@@ -26,7 +42,7 @@ interface BaseVideoBlockProps extends BaseMediaBlockProps {
 
 // Single video props (includes url)
 export interface SingleVideoBlockProps extends BaseVideoBlockProps {
-  url: string;
+  url: YouTubeURL; // Now only accepts YouTube URLs
   timestamps?: string | VideoTimestamp[];
   multiVideo?: never; // Ensure multiVideo cannot be used with url
 }
@@ -34,7 +50,12 @@ export interface SingleVideoBlockProps extends BaseVideoBlockProps {
 // Multi video props (excludes url)
 export interface MultiVideoBlockProps extends BaseVideoBlockProps {
   url?: never; // Ensure url cannot be used with multiVideo
-  multiVideo: MultiVideoProps;
+  multiVideo: {
+    urls: YouTubeURL[]; // Now only accepts YouTube URLs
+    titles: string[];
+    timestamps?: (string | VideoTimestamp[])[];
+    timestampsColor?: ColorToken;
+  };
 }
 
 // Union type for video block props

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Play, Image as ImageIcon, Film, Music, LucideIcon, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/utils/common';
-import { MediaBlockProps, MediaType, MultiVideoBlockProps, SingleVideoBlockProps, VideoBlockProps, VideoTimestamp } from '@/types/media';
+import { MediaBlockProps, MediaType, MultiVideoBlockProps, SingleVideoBlockProps, VideoBlockProps, VideoTimestamp, YouTubeURL } from '@/types/media';
 import { parseTimestamps, convertToYouTubeEmbedURL } from '@/utils/videoUtils';
 import { VideoTimestamps } from './VideoTimestamps';
 import { VideoNavigation } from './VideoNavigation';
@@ -40,6 +40,16 @@ function ErrorDisplay({ onRetry }: ErrorDisplayProps) {
         <RefreshCw className="w-4 h-4" />
         Retry
       </button>
+    </div>
+  );
+}
+
+// Add URL validation error component
+function InvalidURLError() {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/5 backdrop-blur-sm">
+      <AlertCircle className="w-8 h-8 text-red-500" />
+      <p className="text-sm text-red-500">Invalid YouTube URL</p>
     </div>
   );
 }
@@ -86,7 +96,7 @@ declare global {
 }
 
 export function MediaBlock({ 
-  url = '', 
+  url = '' as YouTubeURL, 
   title = '', 
   mediaType, 
   aspectRatio,
@@ -95,11 +105,24 @@ export function MediaBlock({
 }: MediaBlockProps) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-
+  
+  // Remove isValidURL state and validation effects since TypeScript handles it
+  
   // Extract video-specific props and narrow the type
   const videoProps = props as VideoBlockProps;
   const isMultiVideo = 'multiVideo' in videoProps;
-  
+
+  // Get current URL and timestamps based on multiVideo state
+  const currentUrl = useMemo(() => {
+    if (mediaType !== 'Video') return url;
+    
+    if (isMultiVideo) {
+      const multiVideoProps = videoProps as MultiVideoBlockProps;
+      return multiVideoProps.multiVideo.urls[currentVideoIndex];
+    }
+    return (videoProps as SingleVideoBlockProps).url;
+  }, [mediaType, videoProps, currentVideoIndex, url, isMultiVideo]);
+
   // Safely access properties based on video type
   const timestamps = isMultiVideo 
     ? (videoProps as MultiVideoBlockProps).multiVideo.timestamps 
@@ -108,8 +131,7 @@ export function MediaBlock({
   const timestampsColor = videoProps.timestampsColor;
   const multiVideo = isMultiVideo ? (videoProps as MultiVideoBlockProps).multiVideo : undefined;
 
-  // Get current URL and timestamps based on multiVideo state
-  const currentUrl = multiVideo ? multiVideo.urls[currentVideoIndex] : url;
+  // Get current timestamps based on multiVideo state
   const currentTimestamps = multiVideo ? multiVideo.timestamps?.[currentVideoIndex] : timestamps;
 
   // Add navigation controls if needed
@@ -272,7 +294,13 @@ export function MediaBlock({
     }
   };
 
+  const isValidYouTubeURL = (url: string): url is YouTubeURL => {
+    return url.match(/^(https:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/i) !== null;
+  };
+
   const renderYouTubeVideo = () => {
+    if (!processedUrl || !isValidYouTubeURL(processedUrl)) return null;
+    
     return (
       <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
         <div 
@@ -284,6 +312,10 @@ export function MediaBlock({
   };
 
   const renderMedia = () => {
+    if (mediaType === 'Video' && (!processedUrl || !isValidYouTubeURL(processedUrl))) {
+      return <InvalidURLError />;
+    }
+
     switch (mediaType) {
       case 'Video':
         if (processedUrl?.includes('youtube.com/embed/')) {
