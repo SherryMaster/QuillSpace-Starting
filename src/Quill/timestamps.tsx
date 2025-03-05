@@ -60,17 +60,17 @@ export const jvascript_timestamps = `
 8:18:27 - Manipulating Text Content
 8:29:19 - Managing Classes
 8:36:48 - Working with Attributes
-8:42:07 - Navigating Siblings
-8:50:52 - Modifying Styles
-8:59:23 - Creating DOM Elements
-9:12:05 - Removing DOM Elements
-9:14:24 - DOM Events Intro
-9:28:45 - Event Handling
-9:39:24 - Keyboard Events
-9:45:32 - Working with DOM Events
-9:56:50 - DOM Project 1
-9:56:49 - DOM Project 2
-10:03:32 - DOM Project 3
+8:48:13 - Navigating Siblings
+8:56:57 - Modifying Styles
+9:05:28 - Creating DOM Elements
+9:18:10 - Removing DOM Elements
+9:20:29 - DOM Events Intro
+9:34:50 - Event Handling
+9:45:29 - Keyboard Events
+9:50:37 - Working with DOM Events
+9:57:32 - DOM Project 1
+10:01:54 - DOM Project 2
+10:08:37 - DOM Project 3
 10:13:37 - DOM Project 4
 10:17:27 - DOM Project 5
 10:23:12 - DOM Project 6
