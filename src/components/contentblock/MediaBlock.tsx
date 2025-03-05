@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Play, Image as ImageIcon, Film, Music, LucideIcon, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/utils/common';
-import { MediaBlockProps, MediaType, VideoBlockProps } from '@/types/media';
+import { MediaBlockProps, MediaType, MultiVideoBlockProps, SingleVideoBlockProps, VideoBlockProps, VideoTimestamp, YouTubeURL } from '@/types/media';
 import { parseTimestamps, convertToYouTubeEmbedURL } from '@/utils/videoUtils';
 import { VideoTimestamps } from './VideoTimestamps';
 import { VideoNavigation } from './VideoNavigation';
+import { useVideoProgress } from '@/hooks/useVideoProgress';
 
 interface LoadingAnimationProps {
   type: MediaType;
@@ -44,6 +45,16 @@ function ErrorDisplay({ onRetry }: ErrorDisplayProps) {
   );
 }
 
+// Add URL validation error component
+function InvalidURLError() {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/5 backdrop-blur-sm">
+      <AlertCircle className="w-8 h-8 text-red-500" />
+      <p className="text-sm text-red-500">Invalid YouTube URL</p>
+    </div>
+  );
+}
+
 const mediaTypeConfig: Record<MediaType, {
   icon: LucideIcon;
   containerClass: string;
@@ -75,6 +86,7 @@ interface YouTubePlayer {
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
   getCurrentTime: () => number;
   getPlayerState: () => number;
+  getDuration: () => number;
   destroy: () => void;
 }
 
@@ -86,22 +98,42 @@ declare global {
 }
 
 export function MediaBlock({ 
-  url = '', 
+  url = '' as YouTubeURL, 
   title = '', 
   mediaType, 
   aspectRatio,
-  className, // Add this line to include className in props destructuring
+  className,
   ...props 
 }: MediaBlockProps) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // Extract video-specific props safely
+  
+  // Remove isValidURL state and validation effects since TypeScript handles it
+  
+  // Extract video-specific props and narrow the type
   const videoProps = props as VideoBlockProps;
-  const { timestamps, timestampsColor, multiVideo } = videoProps;
+  const isMultiVideo = 'multiVideo' in videoProps;
 
   // Get current URL and timestamps based on multiVideo state
-  const currentUrl = multiVideo ? multiVideo.urls[currentVideoIndex] : url;
+  const currentUrl = useMemo(() => {
+    if (mediaType !== 'Video') return url;
+    
+    if (isMultiVideo) {
+      const multiVideoProps = videoProps as MultiVideoBlockProps;
+      return multiVideoProps.multiVideo.urls[currentVideoIndex];
+    }
+    return (videoProps as SingleVideoBlockProps).url;
+  }, [mediaType, videoProps, currentVideoIndex, url, isMultiVideo]);
+
+  // Safely access properties based on video type
+  const timestamps = isMultiVideo 
+    ? (videoProps as MultiVideoBlockProps).multiVideo.timestamps 
+    : (videoProps as SingleVideoBlockProps).timestamps;
+  
+  const timestampsColor = videoProps.timestampsColor;
+  const multiVideo = isMultiVideo ? (videoProps as MultiVideoBlockProps).multiVideo : undefined;
+
+  // Get current timestamps based on multiVideo state
   const currentTimestamps = multiVideo ? multiVideo.timestamps?.[currentVideoIndex] : timestamps;
 
   // Add navigation controls if needed
@@ -110,17 +142,41 @@ export function MediaBlock({
   const handleNext = () => {
     if (isTransitioning || !multiVideo) return;
     setIsTransitioning(true);
+    
+    // Save progress for current video before switching
+    if (playerRef.current) {
+      const player = playerRef.current;
+      saveProgress(
+        player.getCurrentTime(),
+        player.getDuration(),
+        multiVideo.titles[currentVideoIndex]
+      );
+    }
+    
+    stopProgressSaving();
     setCurrentTime(0);
     setCurrentVideoIndex((prev) => (prev + 1) % multiVideo.urls.length);
-    setTimeout(() => setIsTransitioning(false), 300); // Add a small delay for transition
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const handlePrev = () => {
     if (isTransitioning || !multiVideo) return;
     setIsTransitioning(true);
+    
+    // Save progress for current video before switching
+    if (playerRef.current) {
+      const player = playerRef.current;
+      saveProgress(
+        player.getCurrentTime(),
+        player.getDuration(),
+        multiVideo.titles[currentVideoIndex]
+      );
+    }
+    
+    stopProgressSaving();
     setCurrentTime(0);
     setCurrentVideoIndex((prev) => (prev - 1 + multiVideo.urls.length) % multiVideo.urls.length);
-    setTimeout(() => setIsTransitioning(false), 300); // Add a small delay for transition
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const [status, setStatus] = useState<'loading' | 'error' | 'loaded'>('loading');
@@ -129,6 +185,15 @@ export function MediaBlock({
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | HTMLImageElement | null>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  const {
+    savedPosition,
+    actions: {
+      saveProgress,
+      startProgressSaving,
+      stopProgressSaving
+    }
+  } = useVideoProgress(currentUrl);
 
   // Process YouTube URL if needed
   const processedUrl = useMemo(() => {
@@ -152,12 +217,19 @@ export function MediaBlock({
         try {
           const urlObj = new URL(processedUrl);
           const videoId = urlObj.pathname.split('/').pop();
-          const clip = urlObj.searchParams.get('clip');
-          const clipt = urlObj.searchParams.get('clipt');
           
-          if (!videoId) return;
+          if (!videoId || !window.YT) return;
           
-          if (!window.YT) return;
+          interface YTPlayerEvent {
+            target: YouTubePlayer & {
+              getDuration: () => number;
+              getVideoData: () => { title: string };
+            };
+          }
+
+          interface YTStateChangeEvent extends YTPlayerEvent {
+            data: number;
+          }
           
           playerRef.current = new window.YT.Player(playerContainerRef.current!, {
             videoId,
@@ -165,29 +237,57 @@ export function MediaBlock({
               modestbranding: 1,
               rel: 0,
               controls: 1,
-              ...(clip && clipt ? { clip, clipt } : {})
+              start: Math.floor(savedPosition || 0)
             },
             events: {
-              onReady: () => {
+              onReady: (event: YTPlayerEvent) => {
                 setStatus('loaded');
-                
-                // Start time tracking
-                const timeUpdateInterval = setInterval(() => {
-                  if (playerRef.current) {
-                    const time = playerRef.current.getCurrentTime();
-                    setCurrentTime(time);
-                  }
-                }, 200);
+                const player = event.target;
+                const duration = player.getDuration();
+                const title = player.getVideoData().title;
 
-                return () => clearInterval(timeUpdateInterval);
+                // Start progress tracking
+                const updateProgress = () => {
+                  const currentTime = player.getCurrentTime();
+                  saveProgress(currentTime, duration, title);
+                  startProgressSaving(currentTime, duration, title);
+                };
+
+                // Initial progress save
+                updateProgress();
+
+                // Set up interval for regular progress updates
+                const progressInterval = setInterval(updateProgress, 5000);
+
+                // Cleanup interval on player destroy
+                const originalDestroy = player.destroy;
+                player.destroy = () => {
+                  clearInterval(progressInterval);
+                  originalDestroy.call(player);
+                };
               },
-              onStateChange: (event: { data: any; }) => {
-                if (window.YT?.PlayerState && event.data === window.YT.PlayerState.PLAYING) {
-                  setStatus('loaded');
+              onStateChange: (event: YTStateChangeEvent) => {
+                if (window.YT?.PlayerState) {
+                  const player = event.target;
+                  const currentTime = player.getCurrentTime();
+                  const duration = player.getDuration();
+                  const title = player.getVideoData().title;
+
+                  if (event.data === window.YT.PlayerState.PLAYING) {
+                    setStatus('loaded');
+                    startProgressSaving(currentTime, duration, title);
+                  } else if (
+                    event.data === window.YT.PlayerState.PAUSED ||
+                    event.data === window.YT.PlayerState.ENDED
+                  ) {
+                    stopProgressSaving();
+                    saveProgress(currentTime, duration, title);
+                  }
                 }
               },
               onError: () => {
                 setStatus('error');
+                stopProgressSaving();
               }
             }
           });
@@ -204,17 +304,23 @@ export function MediaBlock({
       }
 
       return () => {
+        stopProgressSaving();
         if (playerRef.current) {
           playerRef.current.destroy();
           playerRef.current = null;
         }
       };
     }
-  }, [mediaType, processedUrl]);
+  }, [mediaType, processedUrl, savedPosition, saveProgress, startProgressSaving, stopProgressSaving]);
 
   useEffect(() => {
     if (timestamps && mediaType === 'Video') {
-      parseTimestamps(timestamps); // Remove setParsedTimestamps since it's not needed
+      // Check if timestamps is a nested array (for multiVideo)
+      if (Array.isArray(timestamps) && Array.isArray(timestamps[0])) {
+        return; // Skip processing for multiVideo timestamps array
+      }
+      // Now TypeScript knows timestamps is either string | VideoTimestamp[]
+      parseTimestamps(timestamps as string | VideoTimestamp[]);
     }
   }, [timestamps, mediaType]);
 
@@ -259,7 +365,13 @@ export function MediaBlock({
     }
   };
 
+  const isValidYouTubeURL = (url: string): url is YouTubeURL => {
+    return url.match(/^(https:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/i) !== null;
+  };
+
   const renderYouTubeVideo = () => {
+    if (!processedUrl || !isValidYouTubeURL(processedUrl)) return null;
+    
     return (
       <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
         <div 
@@ -271,6 +383,10 @@ export function MediaBlock({
   };
 
   const renderMedia = () => {
+    if (mediaType === 'Video' && (!processedUrl || !isValidYouTubeURL(processedUrl))) {
+      return <InvalidURLError />;
+    }
+
     switch (mediaType) {
       case 'Video':
         if (processedUrl?.includes('youtube.com/embed/')) {
@@ -370,7 +486,11 @@ export function MediaBlock({
       {mediaType === 'Video' && currentTimestamps && currentTimestamps.length > 0 && (
         <div className="mt-4">
           <VideoTimestamps
-            timestamps={parseTimestamps(currentTimestamps)}
+            timestamps={parseTimestamps(
+              Array.isArray(currentTimestamps) && Array.isArray(currentTimestamps[0])
+                ? currentTimestamps[currentVideoIndex] as string | VideoTimestamp[]
+                : currentTimestamps as string | VideoTimestamp[]
+            )}
             onTimestampClick={handleTimestampClick}
             currentTime={currentTime}
             color={timestampsColor || "purple"}

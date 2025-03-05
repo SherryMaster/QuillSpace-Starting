@@ -34,7 +34,7 @@ import { IconProps } from '@/utils/iconUtils';
 import { cn } from '@/utils/common';
 import { type ColorToken } from '@/types/colors';
 import { getColorClass } from '@/utils/colors';
-import type { MediaType, VideoBlockProps, MediaBlockProps as BaseMediaBlockProps } from '@/types/media';
+import type { MediaType, VideoBlockProps, MediaBlockProps as BaseMediaBlockProps, VideoTimestamp } from '@/types/media';
 import { MediaBlock } from './MediaBlock';
 import { removeCommonIndentation } from "@/utils/common";
 import { GlossaryBlock } from './GlossaryBlock';
@@ -170,8 +170,7 @@ interface MediaBlockProps extends BaseBlockProps {
   type: "Media";
   title: string;
   mediaType: MediaType;
-  url: string;
-  timestamps?: string; 
+  timestamps?: string | VideoTimestamp[]; 
   timestampsColor?: ColorToken;
   aspectRatio?: string;
   autoPlay?: boolean;
@@ -914,20 +913,28 @@ export function ContentBlock(props: ContentBlockProps) {
               {...(props.type === "Media" && props.mediaType === "Video" 
                 ? {
                     ...(props as VideoBlockProps),
-                    timestamps: typeof props.timestamps === 'string' 
-                      ? removeCommonIndentation(props.timestamps) 
-                      : props.timestamps,
-                    multiVideo: props.multiVideo ? {
-                      ...props.multiVideo,
-                      timestamps: props.multiVideo.timestamps?.map(timestamp => 
-                        typeof timestamp === 'string'
-                          ? removeCommonIndentation(timestamp)
-                          : timestamp
-                      )
-                    } : undefined
+                    ...(('timestamps' in props && !('multiVideo' in props)) 
+                      ? {
+                          timestamps: typeof props.timestamps === 'string'
+                            ? removeCommonIndentation(props.timestamps)
+                            : props.timestamps
+                        } 
+                      : {}),
+                    ...(('multiVideo' in props) 
+                      ? {
+                          multiVideo: {
+                            ...(props as any).multiVideo,
+                            timestamps: (props as any).multiVideo?.timestamps?.map(
+                              (timestamp: string | VideoTimestamp[]) =>
+                                typeof timestamp === 'string'
+                                  ? removeCommonIndentation(timestamp)
+                                  : timestamp
+                            )
+                          }
+                        }
+                      : {})
                   }
-                : props as BaseMediaBlockProps
-              )}
+                : props)} // Remove the explicit cast to BaseMediaBlockProps
             />
           )}
 

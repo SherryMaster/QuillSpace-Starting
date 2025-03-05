@@ -1,5 +1,4 @@
 import { BaseBlockProps } from "@/components/contentblock/ContentBlock";
-import { ColorToken } from "./colors";
 
 export interface GlossaryEntry {
   term: string;
