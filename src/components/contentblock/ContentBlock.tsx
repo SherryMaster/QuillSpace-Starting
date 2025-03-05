@@ -684,6 +684,11 @@ export function ContentBlock(props: ContentBlockProps) {
   };
 
   const getBlockClassName = (props: ContentBlockProps): string => {
+    // Early return for Classic blocks with no styling
+    if (props.type === "Classic") {
+      return props.className || '';
+    }
+
     // Handle Note blocks
     if (props.type === "Note") {
       return noteTypeConfig[(props as NoteBlockProps).noteType]?.containerClass;
@@ -741,7 +746,7 @@ export function ContentBlock(props: ContentBlockProps) {
       'content-block',
       props.type !== "Classic" && "border-2 p-6 backdrop-blur-sm rounded-lg",
       getBlockClassName(props),
-      props.className // Keep this at the end to allow overrides
+      props.className
     ),
     style: {
       '--block-depth': parentId ? '1' : '0'
