@@ -9,39 +9,53 @@ export interface VideoTimestamp {
   formattedTime: string; // HH:MM:SS format
 }
 
-// Base Media Block Props
+// Base Media Block Props (remove url from here)
 interface BaseMediaBlockProps extends BaseBlockProps {
   type: "Media";
-  url: string;
   aspectRatio?: string;
   autoPlay?: boolean;
   controls?: boolean;
 }
 
-// Video-specific props
-export interface VideoBlockProps extends BaseMediaBlockProps {
+// Video-specific base props (without url)
+interface BaseVideoBlockProps extends BaseMediaBlockProps {
   mediaType: 'Video';
-  url?: string;
-  title?: string;
-  timestamps?: string | VideoTimestamp[];
+  title: string;
   timestampsColor?: ColorToken;
-  // New multi-video support
-  multiVideo?: MultiVideoProps;
 }
+
+// Single video props (includes url)
+export interface SingleVideoBlockProps extends BaseVideoBlockProps {
+  url: string;
+  timestamps?: string | VideoTimestamp[];
+  multiVideo?: never; // Ensure multiVideo cannot be used with url
+}
+
+// Multi video props (excludes url)
+export interface MultiVideoBlockProps extends BaseVideoBlockProps {
+  url?: never; // Ensure url cannot be used with multiVideo
+  multiVideo: MultiVideoProps;
+}
+
+// Union type for video block props
+export type VideoBlockProps = SingleVideoBlockProps | MultiVideoBlockProps;
 
 // Audio-specific props
 export interface AudioBlockProps extends BaseMediaBlockProps {
   mediaType: 'Audio';
+  url: string;
 }
 
 // Image-specific props
 export interface ImageBlockProps extends BaseMediaBlockProps {
   mediaType: 'Image';
+  url: string;
 }
 
 // GIF-specific props
 export interface GifBlockProps extends BaseMediaBlockProps {
   mediaType: 'GIF';
+  url: string;
 }
 
 // Union type for all media block props

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Play, Image as ImageIcon, Film, Music, LucideIcon, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/utils/common';
-import { MediaBlockProps, MediaType, VideoBlockProps } from '@/types/media';
+import { MediaBlockProps, MediaType, MultiVideoBlockProps, SingleVideoBlockProps, VideoBlockProps, VideoTimestamp } from '@/types/media';
 import { parseTimestamps, convertToYouTubeEmbedURL } from '@/utils/videoUtils';
 import { VideoTimestamps } from './VideoTimestamps';
 import { VideoNavigation } from './VideoNavigation';
@@ -90,15 +90,23 @@ export function MediaBlock({
   title = '', 
   mediaType, 
   aspectRatio,
-  className, // Add this line to include className in props destructuring
+  className,
   ...props 
 }: MediaBlockProps) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Extract video-specific props safely
+  // Extract video-specific props and narrow the type
   const videoProps = props as VideoBlockProps;
-  const { timestamps, timestampsColor, multiVideo } = videoProps;
+  const isMultiVideo = 'multiVideo' in videoProps;
+  
+  // Safely access properties based on video type
+  const timestamps = isMultiVideo 
+    ? (videoProps as MultiVideoBlockProps).multiVideo.timestamps 
+    : (videoProps as SingleVideoBlockProps).timestamps;
+  
+  const timestampsColor = videoProps.timestampsColor;
+  const multiVideo = isMultiVideo ? (videoProps as MultiVideoBlockProps).multiVideo : undefined;
 
   // Get current URL and timestamps based on multiVideo state
   const currentUrl = multiVideo ? multiVideo.urls[currentVideoIndex] : url;
@@ -214,7 +222,12 @@ export function MediaBlock({
 
   useEffect(() => {
     if (timestamps && mediaType === 'Video') {
-      parseTimestamps(timestamps); // Remove setParsedTimestamps since it's not needed
+      // Check if timestamps is a nested array (for multiVideo)
+      if (Array.isArray(timestamps) && Array.isArray(timestamps[0])) {
+        return; // Skip processing for multiVideo timestamps array
+      }
+      // Now TypeScript knows timestamps is either string | VideoTimestamp[]
+      parseTimestamps(timestamps as string | VideoTimestamp[]);
     }
   }, [timestamps, mediaType]);
 
@@ -370,7 +383,11 @@ export function MediaBlock({
       {mediaType === 'Video' && currentTimestamps && currentTimestamps.length > 0 && (
         <div className="mt-4">
           <VideoTimestamps
-            timestamps={parseTimestamps(currentTimestamps)}
+            timestamps={parseTimestamps(
+              Array.isArray(currentTimestamps) && Array.isArray(currentTimestamps[0])
+                ? currentTimestamps[currentVideoIndex] as string | VideoTimestamp[]
+                : currentTimestamps as string | VideoTimestamp[]
+            )}
             onTimestampClick={handleTimestampClick}
             currentTime={currentTime}
             color={timestampsColor || "purple"}
