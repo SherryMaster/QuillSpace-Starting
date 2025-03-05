@@ -245,10 +245,14 @@ export function MediaBlock({
                 const player = event.target;
                 const duration = player.getDuration();
                 const title = player.getVideoData().title;
+                
+                // Set initial time
+                setCurrentTime(player.getCurrentTime());
 
                 // Start progress tracking
                 const updateProgress = () => {
                   const currentTime = player.getCurrentTime();
+                  setCurrentTime(currentTime); // Update current time state
                   saveProgress(currentTime, duration, title);
                   startProgressSaving(currentTime, duration, title);
                 };
@@ -270,6 +274,7 @@ export function MediaBlock({
                 if (window.YT?.PlayerState) {
                   const player = event.target;
                   const currentTime = player.getCurrentTime();
+                  setCurrentTime(currentTime); // Update current time on state change
                   const duration = player.getDuration();
                   const title = player.getVideoData().title;
 
@@ -312,6 +317,18 @@ export function MediaBlock({
       };
     }
   }, [mediaType, processedUrl, savedPosition, saveProgress, startProgressSaving, stopProgressSaving]);
+
+  // Add a time update interval for YouTube player
+  useEffect(() => {
+    if (mediaType === 'Video' && playerRef.current) {
+      const timeUpdateInterval = setInterval(() => {
+        const currentTime = playerRef.current?.getCurrentTime() || 0;
+        setCurrentTime(currentTime);
+      }, 100); // Update every 100ms
+
+      return () => clearInterval(timeUpdateInterval);
+    }
+  }, [mediaType, playerRef.current]);
 
   useEffect(() => {
     if (timestamps && mediaType === 'Video') {
