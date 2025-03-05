@@ -2,23 +2,23 @@ export const jvascript_timestamps = `
 0:00 - Introduction
 0:09 - Course Structure
 9:01 - JavaScript Overview
-10:25 - Code Execution
-12:50 - Dev Environment Setup
-16:15 - Connect JS to HTML
-23:13 - Using Console & Comments
-30:42 - Mastering Variables
-48:22 - Working with Numbers
-57:50 - Grasping Booleans
-1:05:21 - Comparison Operators
-1:20:03 - Manipulating Strings
-1:41:16 - Type Conversion
-1:46:28 - Conditional Statements
-2:02:13 - Switch Statements
-2:13:10 - For Loop
-2:23:46 - While Loop
-2:27:50 - Do-While Loop
-2:30:42 - Logical Operations
-2:40:30 - Arrays Introduction
+10:30 - Code Execution
+12:56 - Dev Environment Setup
+16:22 - Connect JS to HTML
+28:37 - Using Console & Comments
+36:56 - Mastering Variables
+54:35 - Working with Numbers
+1:03:57 - Grasping Booleans
+1:11:40 - Comparison Operators
+1:26:17 - Manipulating Strings
+1:47:27 - Type Conversion
+1:53:28 - Conditional Statements
+2:08:20 - Switch Statements
+2:19:21 - For Loop
+2:29:55 - While Loop
+2:33:58 - Do-While Loop
+2:36:53 - Logical Operations
+2:46:41 - Arrays Introduction
 2:52:17 - Array Techniques
 3:06:06 - JavaScript Objects
 3:20:09 - Functions Basics
