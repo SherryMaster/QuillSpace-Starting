@@ -19,12 +19,12 @@ export const jvascript_timestamps = `
 2:33:58 - Do-While Loop
 2:36:53 - Logical Operations
 2:46:41 - Arrays Introduction
-2:52:17 - Array Techniques
-3:06:06 - JavaScript Objects
-3:20:09 - Functions Basics
-3:35:05 - Function Types
-3:39:28 - Callback Functions
-3:47:48 - Variable Scope
+2:58:28 - Array Techniques
+3:12:20 - JavaScript Objects
+3:26:20 - Functions Basics
+3:41:15 - Function Types
+3:45:43 - Callback Functions
+3:54:00 - Variable Scope
 3:55:41 - Object Methods
 3:59:25 - JSON Handling
 4:06:45 - Dates & Time
