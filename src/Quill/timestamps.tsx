@@ -1,100 +1,116 @@
-export const jvascript_dsa_timestamps = `
-00:00 - Intro
-00:42 - What is DSA
-3:53 - Course Requirements
-4:40 - Course Setup
-6:46 - Solving the first problem
-10:07 - Why Should I Care
-10:58 - What is bigO
-13:48 - O(n)
-20:11 - O(1)
-23:48 - O(n^2)
-29:37 - O(log n)
-33:55 - DS Arrays
-34:26 - What is DS Array
-36:05 - Creating Custom Array
-37:42 - Custom Push Method
-41:20 - Custom Get Method
-43:05 - Custom Pop Method
-46:30 - Custom Shift Method
-51:17 - Custom DeleteByIndex Method
-54:35 - Reverse String
-59:31 - Palindromes
-1:02:30 - Reverse Integer
-1:05:57 - Sentence Capitalization
-1:10:23 - FizzBuzz
-1:14:06 - Max Profit 
-1:20:41 - Array Chunks
-1:26:18 - Two Sum ( ugly code )
-1:30:01 - What is Linked List
-1:33:01 - How the Linked List Looks Like
-1:36:05 - Creating Our First Linked List
-1:40:01 - Linked List Push Method
-1:45:24 - Linked List Pop Method
-1:52:42 - Linked List Unshift Method
-1:56:51 - Linked List Shift Method
-1:59:44 - Linked List GET FIRST Method
-2:00:53 - Linked List GET LAST Method
-2:03:05 - Linked List GET ELEMENT BY INDEX Method
-2:06:15 - Linked List SET Method
-2:10:33 - Linked List INSERT Method
-2:17:31 - Linked List SIZE Method
-2:19:18 - Linked List CLEAR Method
-2:20:17 - What is Doubly Linked List
-2:21:34 - Create Your First Doubly Linked List
-2:23:06 - Doubly Linked List Push Method
-2:26:43 - Doubly Linked List Pop Method
-2:30:47 - Doubly Linked List Unshift Method
-2:34:43 - Doubly Linked List Shift Method
-2:37:38 - Reverse Linked List
-2:45:32 - Stack & Queues
-2:46:20 - What is a Stack
-2:49:36 - Creating Our First Stack
-2:52:01 - Stack Push Method
-2:55:29 - Stack Pop Method
-2:58:49 - What is Queue
-3:00:38 - Queues Enqueue Method
-3:06:14 - Queues Dequeue Method
-3:09:36 - Queues Min Method
-3:14:22 - isValidParenthesis
-3:19:05 - Reverse String Using Stack
-3:22:08 - Hash Tables
-3:22:21 - What is a Hash Table
-3:23:30 - What is a Hash Function
-3:24:29 - How Hash Table Looks Like
-3:26:11 - Creating Our First Hash Table
-3:29:27 - Hash Table Set Method
-3:34:02 - Hash Table Get Method
-3:38:37 - Get All Keys & Values
-3:43:01 - Word Counter
-3:47:15 - Two Sum ( refactor )
-3:51:06 - What is a Tree
-3:55:36 - BST
-4:00:27 - Creating Our First Binary Search Tree
-4:02:15 - Binary Search Tree Insert Method
-4:08:36 - Binary Search Tree Includes Method
-4:15:42 - What is Recursion
-4:17:11 - Recursion Count Down
-4:20:19 - Recursion Factorial
-4:23:11 - Tree Traversal ( Breath First Search )
-4:31:56 - Tree Traversal ( Depth First Search PreOrder )
-4:41:41 - Tree Traversal ( Depth First Search PostOrder )
-4:50:32 - What is a Graph
-4:55:38 - Creating Our First Graph
-4:56:23 - Add Vertex To Graph
-4:58:36 - Add Edges To Graph
-5:01:21 - Remove Edges From Graph
-5:04:50 - Remove Vertex From Graph
-5:09:33 - What is Bubble Sort
-5:12:03 - Creating Bubble Sort
-5:15:06- What is Selection Sort
-5:19:33 - Creating Selection Sort
-5:22:20 - What is Insertion Sort
-5:24:48 - Creating Insertion Sort
-5:27:18 - What is Merge Sort
-5:29:15 - Creating Merge
-5:35:44 - Creating Merge Sort
-5:38:32 - Outro
+export const jvascript_timestamps = `
+0:00 - Introduction
+0:09 - Course Structure
+9:01 - JavaScript Overview
+10:25 - Code Execution
+12:50 - Dev Environment Setup
+16:15 - Connect JS to HTML
+23:13 - Using Console & Comments
+30:42 - Mastering Variables
+48:22 - Working with Numbers
+57:50 - Grasping Booleans
+1:05:21 - Comparison Operators
+1:20:03 - Manipulating Strings
+1:41:16 - Type Conversion
+1:46:28 - Conditional Statements
+2:02:13 - Switch Statements
+2:13:10 - For Loop
+2:23:46 - While Loop
+2:27:50 - Do-While Loop
+2:30:42 - Logical Operations
+2:40:30 - Arrays Introduction
+2:52:17 - Array Techniques
+3:06:06 - JavaScript Objects
+3:20:09 - Functions Basics
+3:35:05 - Function Types
+3:39:28 - Callback Functions
+3:47:48 - Variable Scope
+3:55:41 - Object Methods
+3:59:25 - JSON Handling
+4:06:45 - Dates & Time
+4:13:34 - setInterval & setTimeout
+4:19:51 - Intermediate Setup
+4:21:19 - Template Strings
+4:32:20 - Arrow Functions
+4:41:58 - Enhanced Object Literals
+4:55:02 - Default Parameters
+5:03:04 - Spread Operator
+5:17:20 - Rest Operator
+5:24:15 - Array Destructuring
+5:38:29 - Object Destructuring
+5:43:59 - Advanced Destructuring
+5:49:40 - Function Destructuring
+5:56:16 - Nested Destructuring
+5:58:09 - Destructuring Craziness
+6:03:32 - Ternary Operator
+6:10:36 - For-In Loop
+6:14:36 - For-Of Loop
+6:17:53 - forEach Method
+6:26:43 - map Helper
+6:33:01 - filter Helper
+6:40:23 - find Helper
+6:47:52 - every & some Helpers
+6:57:22 - reduce Helper
+7:14:02 - Map Data Structure
+7:24:07 - Sets Data Structure
+7:31:23 - Symbols in JavaScript
+7:40:10 - Introduction to DOM
+7:42:37 - DOM Setup
+7:43:36 - Accessing DOM Elements
+8:12:22 - Manipulating Text Content
+8:23:13 - Managing Classes
+8:30:42 - Working with Attributes
+8:42:07 - Navigating Siblings
+8:50:52 - Modifying Styles
+8:59:23 - Creating DOM Elements
+9:12:05 - Removing DOM Elements
+9:14:24 - DOM Events Intro
+9:28:45 - Event Handling
+9:39:24 - Keyboard Events
+9:45:32 - Working with DOM Events
+9:56:50 - DOM Project 1
+9:56:49 - DOM Project 2
+10:03:32 - DOM Project 3
+10:13:37 - DOM Project 4
+10:17:27 - DOM Project 5
+10:23:12 - DOM Project 6
+10:28:08 - Introduction to GSAP
+10:28:10 - GSAP Basics
+10:29:05 - GSAP Setup
+10:31:29 - Animation Techniques
+10:39:56 - Integrating GSAP
+10:41:16 - GSAP Object Overview
+10:46:14 - GSAP Set Method
+10:49:52 - From & FromTo Animation
+10:56:09 - Staggering Animations
+11:01:49 - Tween Control
+11:06:24 - Mastering Timelines
+11:16:49 - Crafting Unique Animations
+11:28:35 - Wrapping Up GSAP
+11:28:43 - OOP Introduction
+11:31:30 - Demystifying THIS Keyword
+11:46:35 - Factory Function
+11:57:32 - Constructor Function
+12:15:32 - Built-In Constructors
+12:19:48 - Object.create Method
+12:23:46 - Prototype Model
+12:41:49 - Prototypal Inheritance
+12:53:03 - Introduction to Classes
+13:06:19 - Modifiers in OOP
+13:21:38 - Encapsulation
+13:28:14 - Abstraction
+13:34:51 - Inheritance
+13:43:03 - Polymorphism
+13:52:41 - Sync & Async Programming
+13:56:08 - Real-World Examples
+14:01:12 - Callback Hell
+14:16:19 - Promises
+14:37:30 - Async Functions
+14:50:27 - Reading Textual Data
+15:00:41 - Handling JSON Data
+15:04:32 - Fetching Data from APIs
+15:18:31 - Error Handling
+15:22:43 - Outro
 `
 
 export const typescript_timestamps = `
