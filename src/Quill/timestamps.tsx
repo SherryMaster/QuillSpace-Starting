@@ -25,19 +25,19 @@ export const jvascript_timestamps = `
 3:41:15 - Function Types
 3:45:43 - Callback Functions
 3:54:00 - Variable Scope
-3:55:41 - Object Methods
-3:59:25 - JSON Handling
-4:06:45 - Dates & Time
-4:13:34 - setInterval & setTimeout
-4:19:51 - Intermediate Setup
-4:21:19 - Template Strings
-4:32:20 - Arrow Functions
-4:41:58 - Enhanced Object Literals
-4:55:02 - Default Parameters
-5:03:04 - Spread Operator
-5:17:20 - Rest Operator
-5:24:15 - Array Destructuring
-5:38:29 - Object Destructuring
+4:01:55 - Object Methods
+4:05:35 - JSON Handling
+4:12:56 - Dates & Time
+4:19:45 - setInterval & setTimeout
+4:25:59 - Intermediate Setup
+4:27:27 - Template Strings
+4:38:26 - Arrow Functions
+4:48:03 - Enhanced Object Literals
+5:01:07 - Default Parameters
+5:09:12 - Spread Operator
+5:23:29 - Rest Operator
+5:30:23 - Array Destructuring
+5:44:37 - Object Destructuring
 5:43:59 - Advanced Destructuring
 5:49:40 - Function Destructuring
 5:56:16 - Nested Destructuring

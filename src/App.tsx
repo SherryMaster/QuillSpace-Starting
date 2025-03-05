@@ -29,7 +29,7 @@ function App() {
             'https://www.youtube.com/watch?v=znZQFzoV3CM',
           ],
           titles: [
-            'JavaScript DSA Complete Course',
+            'JavaScript Complete Course',
             'TypeScript Complete Course',
             'React Mastery (Part 1/4)',
             'React Mastery (Part 2/4)',
