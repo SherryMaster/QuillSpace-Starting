@@ -21,8 +21,12 @@ interface BaseMediaBlockProps extends BaseBlockProps {
 // Video-specific props
 export interface VideoBlockProps extends BaseMediaBlockProps {
   mediaType: 'Video';
+  url?: string;
+  title?: string;
   timestamps?: string | VideoTimestamp[];
   timestampsColor?: ColorToken;
+  // New multi-video support
+  multiVideo?: MultiVideoProps;
 }
 
 // Audio-specific props
@@ -46,3 +50,10 @@ export type MediaBlockProps =
   | AudioBlockProps 
   | ImageBlockProps 
   | GifBlockProps;
+
+export interface MultiVideoProps {
+  urls: string[];
+  titles: string[];
+  timestamps?: (string | VideoTimestamp[])[];
+  timestampsColor?: ColorToken;
+}

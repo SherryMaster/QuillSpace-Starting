@@ -34,7 +34,7 @@ import { IconProps } from '@/utils/iconUtils';
 import { cn } from '@/utils/common';
 import { type ColorToken } from '@/types/colors';
 import { getColorClass } from '@/utils/colors';
-import type { MediaType, VideoBlockProps } from '@/types/media';
+import type { MediaType, VideoBlockProps, MediaBlockProps as BaseMediaBlockProps } from '@/types/media';
 import { MediaBlock } from './MediaBlock';
 import { removeCommonIndentation } from "@/utils/common";
 import { GlossaryBlock } from './GlossaryBlock';
@@ -203,8 +203,7 @@ export type ContentBlockProps =
   | ChallengeBlockProps
   | CodeBlockProps
   | MarkdownBlockProps
-  | VideoBlockProps  
-  | MediaBlockProps
+  | BaseMediaBlockProps  // Replace VideoBlockProps with BaseMediaBlockProps
   | GlossaryBlockProps;
 
 const noteTypeConfig: Record<NoteBlockProps['noteType'], {
@@ -912,18 +911,29 @@ export function ContentBlock(props: ContentBlockProps) {
 
           {props.type === "Media" && (
             <MediaBlock
-              {...(props as MediaBlockProps)}
-              url={(props as MediaBlockProps).url}
-              mediaType={(props as MediaBlockProps).mediaType}
-              type="Media"
-              title={props.title}
-              timestamps={(props as MediaBlockProps).timestamps ? removeCommonIndentation((props as MediaBlockProps).timestamps as string) : undefined}
+              {...(props.type === "Media" && props.mediaType === "Video" 
+                ? {
+                    ...(props as VideoBlockProps),
+                    timestamps: typeof props.timestamps === 'string' 
+                      ? removeCommonIndentation(props.timestamps) 
+                      : props.timestamps,
+                    multiVideo: props.multiVideo ? {
+                      ...props.multiVideo,
+                      timestamps: props.multiVideo.timestamps?.map(timestamp => 
+                        typeof timestamp === 'string'
+                          ? removeCommonIndentation(timestamp)
+                          : timestamp
+                      )
+                    } : undefined
+                  }
+                : props as BaseMediaBlockProps
+              )}
             />
           )}
 
           {props.type === "Glossary" && (
             <GlossaryBlock 
-              {...props as GlossaryBlockProps} // Forward all props instead of just dictionary and title
+              {...props as GlossaryBlockProps}
             />
           )}
 
