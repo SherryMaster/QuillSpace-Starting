@@ -18,7 +18,8 @@ function App() {
         title='From JS Noob to React Monster - Full Series'
         subtitle='Contains 6 courses that will take you from a complete beginner to a React expert.'
         type="Media"
-        mediaType='Video' 
+        mediaType='Video'
+        timestampsColor='cyan' 
         multiVideo={{
           urls: [
             'https://www.youtube.com/watch?v=H3XIJYEPdus',
