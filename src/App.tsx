@@ -14,15 +14,6 @@ function App() {
       subtitle="A Modern way of making notes with QuillSpace"
       emphasizedColors="cyan"
     >
-      <ContentBlock
-        title='From JS Noob to React Monster - Full Series'
-        subtitle='Contains 6 courses that will take you from a complete beginner to a React expert.'
-        type="Media"
-        mediaType='Video'
-        timestampsColor='cyan'
-        url="https://www.youtube.com/watch?v=H3XIJYEPdus"
-        timestamps={javascript_timestamps}
-      /> {/* YouTube video */}
 <ContentBlock
         title='From JS Noob to React Monster - Full Series'
         subtitle='Contains 6 courses that will take you from a complete beginner to a React expert.'
