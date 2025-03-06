@@ -1,4 +1,4 @@
-export const jvascript_timestamps = `
+export const javascript_timestamps = `
 0:00 - Introduction
 0:09 - Course Structure
 9:01 - JavaScript Overview

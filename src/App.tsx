@@ -1,6 +1,6 @@
 import './App.css'
 import Greet from './Quill/ReactFundamentals/Greet';
-import { javascript_dsa_timestamps, jvascript_timestamps as javascript_timestamps, react_part_1_timestamps, react_part_2_timestamps, react_part_3_timestamps, react_part_4_timestamps, typescript_timestamps } from './Quill/timestamps';
+import { javascript_dsa_timestamps, javascript_timestamps, react_part_1_timestamps, react_part_2_timestamps, react_part_3_timestamps, react_part_4_timestamps, typescript_timestamps } from './Quill/timestamps';
 import { ContentBlock } from "./components/contentblock/ContentBlock";
 import { ThemedInteractiveContentLayout } from "./components/layout/ThemedInteractiveContentLayout";
 
