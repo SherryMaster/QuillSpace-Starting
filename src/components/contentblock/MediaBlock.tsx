@@ -147,7 +147,8 @@ export function MediaBlock({
       const multiVideoProps = videoProps as MultiVideoBlockProps;
       return multiVideoProps.multiVideo.urls[currentVideoIndex];
     }
-    return (videoProps as SingleVideoBlockProps).url;
+    // Fix: Return the url from SingleVideoBlockProps
+    return (videoProps as SingleVideoBlockProps).url || url;
   }, [mediaType, videoProps, currentVideoIndex, url, isMultiVideo]);
 
   // Safely access properties based on video type
