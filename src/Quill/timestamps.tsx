@@ -71,44 +71,45 @@ export const jvascript_timestamps = `
 9:57:32 - DOM Project 1
 10:01:54 - DOM Project 2
 10:08:37 - DOM Project 3
-10:13:37 - DOM Project 4
-10:17:27 - DOM Project 5
-10:23:12 - DOM Project 6
-10:28:08 - Introduction to GSAP
-10:28:10 - GSAP Basics
-10:29:05 - GSAP Setup
-10:31:29 - Animation Techniques
-10:39:56 - Integrating GSAP
-10:41:16 - GSAP Object Overview
-10:46:14 - GSAP Set Method
-10:49:52 - From & FromTo Animation
-10:56:09 - Staggering Animations
-11:01:49 - Tween Control
-11:06:24 - Mastering Timelines
-11:16:49 - Crafting Unique Animations
-11:28:35 - Wrapping Up GSAP
-11:28:43 - OOP Introduction
-11:31:30 - Demystifying THIS Keyword
-11:46:35 - Factory Function
-11:57:32 - Constructor Function
-12:15:32 - Built-In Constructors
-12:19:48 - Object.create Method
-12:23:46 - Prototype Model
-12:41:49 - Prototypal Inheritance
-12:53:03 - Introduction to Classes
-13:06:19 - Modifiers in OOP
-13:21:38 - Encapsulation
-13:28:14 - Abstraction
-13:34:51 - Inheritance
-13:43:03 - Polymorphism
-13:52:41 - Sync & Async Programming
-13:56:08 - Real-World Examples
-14:01:12 - Callback Hell
-14:16:19 - Promises
-14:37:30 - Async Functions
-14:50:27 - Reading Textual Data
-15:00:41 - Handling JSON Data
-15:04:32 - Fetching Data from APIs
+10:18:42 - DOM Project 4
+10:22:31 - DOM Project 5
+10:28:17 - DOM Project 6
+10:34:55 - Introduction to GSAP
+10:35:10 - GSAP Basics
+10:35:52 - GSAP Setup
+10:37:07 - Animation Techniques
+10:44:00 - Integrating GSAP
+10:47:14 - GSAP Object Overview
+10:52:09 - GSAP Set Method
+10:56:47 - From & FromTo Animation
+11:02:07 - Staggering Animations
+11:07:47 - Tween Control
+11:12:21 - Mastering Timelines
+11:22:17 - Crafting Unique Animations
+11:34:39 - Wrapping Up GSAP
+11:36:01 - OOP Introduction
+11:39:50 - Demystifying THIS Keyword
+11:53:47 - Factory Function
+12:04:45 - Constructor Function
+12:22:45 - Built-In Constructors
+12:27:01 - Object.create Method
+12:30:59 - Prototype Model
+12:49:02 - Prototypal Inheritance
+13:00:19 - Introduction to Classes
+13:13:34 - Modifiers in OOP
+13:28:50 - OOP Pillars
+13:29:05 - Encapsulation
+13:35:31 - Abstraction
+13:42:06 - Inheritance
+13:50:20 - Polymorphism
+13:59:53 - Sync & Async Programming
+14:03:22 - Real-World Examples
+14:08:24 - Callback Hell
+14:23:33 - Promises
+14:44:37 - Async Functions
+14:57:40 - Reading Textual Data
+15:07:45 - Handling JSON Data
+15:11:43 - Fetching Data from APIs
 15:18:31 - Error Handling
 15:22:43 - Outro
 `
