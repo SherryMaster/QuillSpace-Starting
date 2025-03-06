@@ -293,30 +293,32 @@ export function MediaBlock({
                 setStatus('loaded');
                 const player = event.target;
                 const duration = getVideoDuration(player);
-                setVideoDuration(duration); // Store duration in state
+                setVideoDuration(duration);
                 const title = player.getVideoData().title;
                 
                 // Set initial time
                 setCurrentTime(player.getCurrentTime());
 
-                // Start progress tracking
-                const updateProgress = () => {
+                // Create more frequent time updates (every 100ms)
+                const timeUpdateInterval = setInterval(() => {
+                  if (player && typeof player.getCurrentTime === 'function') {
+                    const currentTime = player.getCurrentTime();
+                    setCurrentTime(currentTime);
+                  }
+                }, 100); // Update every 100ms for smooth progress
+
+                // Progress saving interval (less frequent)
+                const progressSaveInterval = setInterval(() => {
                   const currentTime = player.getCurrentTime();
-                  setCurrentTime(currentTime); // Update current time state
                   saveProgress(currentTime, duration, title);
                   startProgressSaving(currentTime, duration, title);
-                };
+                }, 5000);
 
-                // Initial progress save
-                updateProgress();
-
-                // Set up interval for regular progress updates
-                const progressInterval = setInterval(updateProgress, 5000);
-
-                // Cleanup interval on player destroy
+                // Cleanup intervals on player destroy
                 const originalDestroy = player.destroy;
                 player.destroy = () => {
-                  clearInterval(progressInterval);
+                  clearInterval(timeUpdateInterval);
+                  clearInterval(progressSaveInterval);
                   originalDestroy.call(player);
                 };
               },
@@ -324,11 +326,12 @@ export function MediaBlock({
                 if (window.YT?.PlayerState) {
                   const player = event.target;
                   const currentTime = player.getCurrentTime();
-                  setCurrentTime(currentTime); // Update current time on state change
+                  setCurrentTime(currentTime);
                   const duration = getVideoDuration(player);
-                  setVideoDuration(duration); // Update duration on state change
+                  setVideoDuration(duration);
                   const title = player.getVideoData().title;
 
+                  // Handle state changes
                   if (event.data === window.YT.PlayerState.PLAYING) {
                     setStatus('loaded');
                     startProgressSaving(currentTime, duration, title);

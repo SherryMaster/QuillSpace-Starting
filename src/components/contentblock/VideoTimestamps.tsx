@@ -21,6 +21,7 @@ interface TimestampItemProps {
   onClick: () => void;
   color: ColorToken;
   totalDuration: number;
+  currentTime: number;
 }
 
 function TimestampItem({ 
@@ -30,13 +31,26 @@ function TimestampItem({
   isActive, 
   onClick, 
   color,
-  totalDuration 
+  totalDuration,
+  currentTime 
 }: TimestampItemProps) {
-  // Calculate duration to next timestamp or end of video
-  const durationInSeconds = nextTimestamp 
-    ? nextTimestamp.time - timestamp.time
-    : totalDuration - timestamp.time;
+  const [showTooltip, setShowTooltip] = useState(false);
   
+  // Calculate duration and progress
+  const sectionStart = timestamp.time;
+  const sectionEnd = nextTimestamp ? nextTimestamp.time : totalDuration;
+  const sectionDuration = sectionEnd - sectionStart;
+  
+  // Calculate progress percentage
+  const progress = Math.min(
+    Math.max(
+      ((currentTime - sectionStart) / sectionDuration) * 100,
+      0
+    ),
+    100
+  );
+  const progressPercentage = Math.round(progress);
+
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
@@ -46,36 +60,42 @@ function TimestampItem({
   return (
     <button
       onClick={onClick}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
       className={cn(
-        // Base styles
-        "group relative flex flex-col w-full p-2.5 rounded-lg",
-        "transition-all duration-200 ease-out",
-        "border",
-        
-        // Default state
-        getColorClass(color, 'border', 5),
-        getColorClass(color, 'bg', 5),
-        
-        // Hover effect background
-        "before:absolute before:inset-0 before:rounded-lg",
-        "before:transition-opacity before:duration-200",
-        `before:${getColorClass(color, 'bg', 10)}`,
-        "before:opacity-0 hover:before:opacity-100",
-        
-        // Active state
-        isActive && [
-          getColorClass(color, 'border', 20),
-          getColorClass(color, 'bg', 10),
-          "before:opacity-0"
-        ],
-        
-        // Interactive states
-        "hover:scale-[1.02] hover:-translate-y-[1px]",
-        "active:scale-[0.98] active:translate-y-0",
+        "group w-full text-left p-3 rounded-lg",
+        "hover:bg-background/50",
+        "transition-colors duration-200",
         "focus-visible:outline-none focus-visible:ring-2",
         `focus-visible:${getColorClass(color, 'ring', 20)}`,
+        "relative overflow-hidden" // Important for progress bar
       )}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={progressPercentage}
+      aria-valuetext={`${progressPercentage}% complete`}
     >
+      {/* Progress bar background */}
+      <div 
+        className={cn(
+          "absolute bottom-0 left-0 w-full h-1",
+          getColorClass(color, 'bg', 5)
+        )}
+      />
+      
+      {/* Active progress bar */}
+      <div 
+        className={cn(
+          "absolute bottom-0 left-0 h-1",
+          "transition-all duration-200 ease-out",
+          getColorClass(color, 'bg', isActive ? 30 : 20)
+        )}
+        style={{ 
+          width: `${progress}%`,
+          opacity: progress > 0 ? 1 : 0
+        }}
+      />
+
       <div className="relative z-10 flex items-start gap-2">
         {/* Index number with circle background */}
         <span className={cn(
@@ -118,28 +138,32 @@ function TimestampItem({
               "opacity-60 group-hover:opacity-100"
             )}>
               <Clock className="w-3 h-3" />
-              {formatDuration(durationInSeconds)}
+              {formatDuration(sectionDuration)}
             </span>
           </div>
 
           {/* Label with two-line truncate */}
           <p className={cn(
-            "relative z-10 text-sm line-clamp-2 text-left mt-0.5",
-            "transition-colors duration-200",
-            
-            // Default state
-            "text-foreground/70 dark:text-foreground/60",
-            
-            // Hover state
-            "group-hover:text-foreground",
-            
-            // Active state
-            isActive && "text-foreground dark:text-foreground"
+            "text-sm line-clamp-2 text-left mt-0.5",
+            "transition-colors duration-200"
           )}>
             {timestamp.label}
           </p>
         </div>
       </div>
+
+      {/* Tooltip */}
+      {showTooltip && (
+        <div className={cn(
+          "absolute bottom-full left-1/2 -translate-x-1/2 mb-2",
+          "px-2 py-1 rounded text-xs",
+          "bg-background/90 backdrop-blur-sm",
+          "border shadow-sm",
+          getColorClass(color, 'border', 10)
+        )}>
+          {formatDuration(sectionDuration)} • {progressPercentage}% complete
+        </div>
+      )}
     </button>
   );
 }
@@ -186,6 +210,7 @@ export function VideoTimestamps({
           onClick={() => onTimestampClick(stamp.time)}
           color={color}
           totalDuration={totalDuration}
+          currentTime={currentTime}
         />
       ))}
     </div>
