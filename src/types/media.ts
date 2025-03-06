@@ -7,6 +7,7 @@ export interface VideoTimestamp {
   time: number;      // Seconds
   label: string;     // Description
   formattedTime: string; // HH:MM:SS format
+  durationToNext?: string; // Duration until next timestamp or end
 }
 
 // Define literal union type for valid YouTube URL patterns

@@ -97,6 +97,30 @@ declare global {
   }
 }
 
+const getVideoDuration = (player: YouTubePlayer | null): number => {
+  try {
+    if (player && typeof player.getDuration === 'function') {
+      return player.getDuration();
+    }
+    return 0;
+  } catch (error) {
+    console.error('Error getting video duration:', error);
+    return 0;
+  }
+};
+
+const getCurrentTime = (player: YouTubePlayer | null): number => {
+  try {
+    if (player && typeof player.getCurrentTime === 'function') {
+      return player.getCurrentTime();
+    }
+    return 0;
+  } catch (error) {
+    console.error('Error getting current time:', error);
+    return 0;
+  }
+};
+
 export function MediaBlock({ 
   url = '' as YouTubeURL, 
   title = '', 
@@ -107,6 +131,7 @@ export function MediaBlock({
 }: MediaBlockProps) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [videoDuration, setVideoDuration] = useState(0);
   
   // Remove isValidURL state and validation effects since TypeScript handles it
   
@@ -143,18 +168,30 @@ export function MediaBlock({
     if (isTransitioning || !multiVideo) return;
     setIsTransitioning(true);
     
-    // Save progress for current video before switching
-    if (playerRef.current) {
-      const player = playerRef.current;
-      saveProgress(
-        player.getCurrentTime(),
-        player.getDuration(),
-        multiVideo.titles[currentVideoIndex]
-      );
+    try {
+      if (playerRef.current) {
+        const currentTime = getCurrentTime(playerRef.current);
+        const duration = getVideoDuration(playerRef.current);
+        saveProgress(
+          currentTime,
+          duration,
+          multiVideo.titles[currentVideoIndex]
+        );
+      }
+    } catch (error) {
+      console.error('Error saving progress:', error);
     }
     
     stopProgressSaving();
     setCurrentTime(0);
+    setVideoDuration(0);
+    
+    // Destroy current player before switching
+    if (playerRef.current) {
+      playerRef.current.destroy();
+      playerRef.current = null;
+    }
+    
     setCurrentVideoIndex((prev) => (prev + 1) % multiVideo.urls.length);
     setTimeout(() => setIsTransitioning(false), 300);
   };
@@ -163,18 +200,30 @@ export function MediaBlock({
     if (isTransitioning || !multiVideo) return;
     setIsTransitioning(true);
     
-    // Save progress for current video before switching
-    if (playerRef.current) {
-      const player = playerRef.current;
-      saveProgress(
-        player.getCurrentTime(),
-        player.getDuration(),
-        multiVideo.titles[currentVideoIndex]
-      );
+    try {
+      if (playerRef.current) {
+        const currentTime = getCurrentTime(playerRef.current);
+        const duration = getVideoDuration(playerRef.current);
+        saveProgress(
+          currentTime,
+          duration,
+          multiVideo.titles[currentVideoIndex]
+        );
+      }
+    } catch (error) {
+      console.error('Error saving progress:', error);
     }
     
     stopProgressSaving();
     setCurrentTime(0);
+    setVideoDuration(0);
+    
+    // Destroy current player before switching
+    if (playerRef.current) {
+      playerRef.current.destroy();
+      playerRef.current = null;
+    }
+    
     setCurrentVideoIndex((prev) => (prev - 1 + multiVideo.urls.length) % multiVideo.urls.length);
     setTimeout(() => setIsTransitioning(false), 300);
   };
@@ -243,30 +292,33 @@ export function MediaBlock({
               onReady: (event: YTPlayerEvent) => {
                 setStatus('loaded');
                 const player = event.target;
-                const duration = player.getDuration();
+                const duration = getVideoDuration(player);
+                setVideoDuration(duration);
                 const title = player.getVideoData().title;
                 
                 // Set initial time
                 setCurrentTime(player.getCurrentTime());
 
-                // Start progress tracking
-                const updateProgress = () => {
+                // Create more frequent time updates (every 100ms)
+                const timeUpdateInterval = setInterval(() => {
+                  if (player && typeof player.getCurrentTime === 'function') {
+                    const currentTime = player.getCurrentTime();
+                    setCurrentTime(currentTime);
+                  }
+                }, 100); // Update every 100ms for smooth progress
+
+                // Progress saving interval (less frequent)
+                const progressSaveInterval = setInterval(() => {
                   const currentTime = player.getCurrentTime();
-                  setCurrentTime(currentTime); // Update current time state
                   saveProgress(currentTime, duration, title);
                   startProgressSaving(currentTime, duration, title);
-                };
+                }, 5000);
 
-                // Initial progress save
-                updateProgress();
-
-                // Set up interval for regular progress updates
-                const progressInterval = setInterval(updateProgress, 5000);
-
-                // Cleanup interval on player destroy
+                // Cleanup intervals on player destroy
                 const originalDestroy = player.destroy;
                 player.destroy = () => {
-                  clearInterval(progressInterval);
+                  clearInterval(timeUpdateInterval);
+                  clearInterval(progressSaveInterval);
                   originalDestroy.call(player);
                 };
               },
@@ -274,10 +326,12 @@ export function MediaBlock({
                 if (window.YT?.PlayerState) {
                   const player = event.target;
                   const currentTime = player.getCurrentTime();
-                  setCurrentTime(currentTime); // Update current time on state change
-                  const duration = player.getDuration();
+                  setCurrentTime(currentTime);
+                  const duration = getVideoDuration(player);
+                  setVideoDuration(duration);
                   const title = player.getVideoData().title;
 
+                  // Handle state changes
                   if (event.data === window.YT.PlayerState.PLAYING) {
                     setStatus('loaded');
                     startProgressSaving(currentTime, duration, title);
@@ -320,15 +374,17 @@ export function MediaBlock({
 
   // Add a time update interval for YouTube player
   useEffect(() => {
-    if (mediaType === 'Video' && playerRef.current) {
+    if (mediaType === 'Video' && playerRef.current && !isTransitioning) {
       const timeUpdateInterval = setInterval(() => {
-        const currentTime = playerRef.current?.getCurrentTime() || 0;
-        setCurrentTime(currentTime);
-      }, 100); // Update every 100ms
+        if (playerRef.current) {
+          const time = getCurrentTime(playerRef.current);
+          setCurrentTime(time);
+        }
+      }, 100);
 
       return () => clearInterval(timeUpdateInterval);
     }
-  }, [mediaType, playerRef.current]);
+  }, [mediaType, isTransitioning]);
 
   useEffect(() => {
     if (timestamps && mediaType === 'Video') {
@@ -377,8 +433,12 @@ export function MediaBlock({
   const handleTimestampClick = (time: number) => {
     if (mediaRef.current instanceof HTMLVideoElement) {
       mediaRef.current.currentTime = time;
-    } else if (playerRef.current) {
-      playerRef.current.seekTo(time, true);
+    } else if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
+      try {
+        playerRef.current.seekTo(time, true);
+      } catch (error) {
+        console.error('Error seeking to timestamp:', error);
+      }
     }
   };
 
@@ -511,6 +571,7 @@ export function MediaBlock({
             onTimestampClick={handleTimestampClick}
             currentTime={currentTime}
             color={timestampsColor || "purple"}
+            totalDuration={videoDuration} // Use the state instead of direct player access
           />
         </div>
       )}
