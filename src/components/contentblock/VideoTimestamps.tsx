@@ -22,6 +22,7 @@ interface TimestampItemProps {
   color: ColorToken;
   totalDuration: number;
   currentTime: number;
+  state: 'incomplete' | 'inProgress' | 'completed' | 'partial';
 }
 
 function TimestampItem({ 
@@ -32,10 +33,44 @@ function TimestampItem({
   onClick, 
   color,
   totalDuration,
-  currentTime 
+  currentTime,
+  state 
 }: TimestampItemProps) {
   const [showTooltip, setShowTooltip] = useState(false);
-  
+
+  // Get state-specific styles
+  const getStateStyles = (state: 'incomplete' | 'inProgress' | 'completed' | 'partial') => {
+    const baseStyles = "transition-all duration-300";
+    
+    const stateStyles = {
+      incomplete: cn(
+        baseStyles,
+        "bg-background/5",
+        getColorClass(color, 'border', 10)
+      ),
+      inProgress: cn(
+        baseStyles,
+        getColorClass(color, 'bg', 5),
+        "border-l-4",
+        getColorClass(color, 'border', 30)
+      ),
+      completed: cn(
+        baseStyles,
+        getColorClass(color, 'bg', 10),
+        "border-l-4",
+        getColorClass(color, 'border', 40)
+      ),
+      partial: cn(
+        baseStyles,
+        getColorClass(color, 'bg', 5),
+        "border-l-4 border-dashed",
+        getColorClass(color, 'border', 20)
+      )
+    } as const;
+
+    return stateStyles[state];
+  };
+
   // Calculate duration and progress
   const sectionStart = timestamp.time;
   const sectionEnd = nextTimestamp ? nextTimestamp.time : totalDuration;
@@ -63,12 +98,15 @@ function TimestampItem({
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
       className={cn(
+        // Base styles
         "group w-full text-left p-3 rounded-lg",
         "hover:bg-background/50",
-        "transition-colors duration-200",
+        "transition-all duration-200",
         "focus-visible:outline-none focus-visible:ring-2",
         `focus-visible:${getColorClass(color, 'ring', 20)}`,
-        "relative overflow-hidden" // Important for progress bar
+        "relative overflow-hidden",
+        // State-specific styles
+        getStateStyles(state)
       )}
       aria-valuemin={0}
       aria-valuemax={100}
@@ -97,24 +135,25 @@ function TimestampItem({
       />
 
       <div className="relative z-10 flex items-start gap-2">
+        {/* Status indicator */}
+        <div className={cn(
+          "absolute right-2 top-2",
+          "w-2 h-2 rounded-full",
+          {
+            'bg-gray-300': state === 'incomplete',
+            [getColorClass(color, 'bg', 40)]: state === 'inProgress',
+            [getColorClass(color, 'bg', 60)]: state === 'completed',
+            [`${getColorClass(color, 'bg', 30)} animate-pulse`]: state === 'partial'
+          }
+        )} />
+
         {/* Index number with circle background */}
         <span className={cn(
           "flex-shrink-0 flex items-center justify-center",
           "w-6 h-6 mt-0.5 rounded-full text-xs font-medium",
           "transition-colors duration-200",
-          
-          // Default state
-          getColorClass(color, 'bg', 10),
-          getColorClass(color, 'text'),
-          
-          // Group hover state
-          `group-hover:${getColorClass(color, 'bg', 20)}`,
-          
-          // Active state
-          isActive && [
-            getColorClass(color, 'bg', 20),
-            `group-hover:${getColorClass(color, 'bg', 30)}`
-          ]
+          getStateStyles(state),
+          isActive && getColorClass(color, 'bg', 20)
         )}>
           {index + 1}
         </span>
@@ -152,7 +191,7 @@ function TimestampItem({
         </div>
       </div>
 
-      {/* Tooltip */}
+      {/* Enhanced tooltip with state information */}
       {showTooltip && (
         <div className={cn(
           "absolute bottom-full left-1/2 -translate-x-1/2 mb-2",
@@ -161,7 +200,13 @@ function TimestampItem({
           "border shadow-sm",
           getColorClass(color, 'border', 10)
         )}>
-          {formatDuration(sectionDuration)} • {progressPercentage}% complete
+          <div className="flex items-center gap-2">
+            <span>{formatDuration(sectionDuration)}</span>
+            <span>•</span>
+            <span className="capitalize">{state}</span>
+            <span>•</span>
+            <span>{progressPercentage}% complete</span>
+          </div>
         </div>
       )}
     </button>
@@ -184,6 +229,18 @@ export function VideoTimestamps({
     });
     setActiveTimestamp(current);
   }, [currentTime, timestamps]);
+
+  const getTimestampState = (timestamp: VideoTimestamp, nextTimestamp?: VideoTimestamp) => {
+    const start = timestamp.time;
+    const end = nextTimestamp ? nextTimestamp.time : totalDuration;
+    
+    if (currentTime < start) return 'incomplete';
+    if (currentTime >= end) return 'completed';
+    if (currentTime >= start && currentTime < end) return 'inProgress';
+    if (currentTime >= start && currentTime < start + ((end - start) * 0.9)) return 'partial';
+    
+    return 'incomplete';
+  };
 
   return (
     <div className={cn(
@@ -211,6 +268,7 @@ export function VideoTimestamps({
           color={color}
           totalDuration={totalDuration}
           currentTime={currentTime}
+          state={getTimestampState(stamp, timestamps[idx + 1])}
         />
       ))}
     </div>

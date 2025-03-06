@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BASE_COLORS, BRAND_COLORS, type ColorIntent, type OpacityValue } from '@/types/colors';
+import { BRAND_COLORS, type ColorIntent, type OpacityValue } from '@/types/colors';
 
 // Base variants from ColorIntent type
 const baseVariants: ColorIntent[] = ['bg', 'text', 'border', 'ring', 'fill', 'stroke'];
@@ -15,21 +15,13 @@ const opacities: OpacityValue[] = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95];
 const states = ['hover', 'focus', 'active', 'disabled'];
 const groupStates = ['group-hover', 'group-focus', 'group-active'];
 
-// Theme colors combining both BASE_COLORS and BRAND_COLORS
-const themeColors = {
-  ...Object.fromEntries(
-    Object.keys(BASE_COLORS).map(color => [
-      color,
-      { gradient: ['400', '500', '600'], base: '500' }
-    ])
-  ),
-  ...Object.fromEntries(
-    Object.keys(BRAND_COLORS).map(color => [
-      color,
-      { gradient: ['400', '500', '600'], base: '500' }
-    ])
-  )
-};
+// Theme colors using BRAND_COLORS
+const themeColors = Object.fromEntries(
+  Object.keys(BRAND_COLORS).map(color => [
+    color,
+    { gradient: ['400', '500', '600'], base: '500' }
+  ])
+);
 
 export const generateSafelist = () => {
   const safelist: Set<string> = new Set();
