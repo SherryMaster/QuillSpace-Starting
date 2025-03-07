@@ -1,5 +1,4 @@
 import './App.css'
-import Greet from './Quill/ReactFundamentals/Greet';
 import * as TimeStamps from './Quill/timestamps';
 import { ContentBlock } from "./components/contentblock/ContentBlock";
 import { ThemedInteractiveContentLayout } from "./components/layout/ThemedInteractiveContentLayout";
@@ -39,8 +38,8 @@ function App() {
         }}
       />
 
-<ContentBlock
-        title='From JS Noob to React Monster - Full Series'
+      <ContentBlock
+        title='React Monster - Full Series'
         subtitle='Contains 6 courses that will take you from a complete beginner to a expert React developer.'
         type="Media"
         mediaType='Video'
