@@ -1,5 +1,6 @@
 import "./App.css";
 import Greet from "./Quill/ReactFundamentals/Greet";
+import Counter from "./Quill/ReactFundamentals/useReducerChallenge/Counter";
 import * as TimeStamps from "./Quill/timestamps";
 import { ContentBlock } from "./components/contentblock/ContentBlock";
 import { ThemedInteractiveContentLayout } from "./components/layout/ThemedInteractiveContentLayout";
@@ -63,11 +64,12 @@ function App() {
             TimeStamps.react_part_4_timestamps,
           ],
         }}
-      />
-
-      <ContentBlock title="Part 1 - Challenges" type="Classic">
-        <Greet />
+      >
+      <ContentBlock title="useReducer Challenge" type="Generic" subtitle="A counter with increment decrement and reset using useReducer Hook.">
+        <Counter />
       </ContentBlock>
+      </ContentBlock>
+
     </ThemedInteractiveContentLayout>
   );
 }
