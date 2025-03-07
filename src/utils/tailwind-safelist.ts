@@ -34,8 +34,17 @@ const themeColors = Object.fromEntries(
   ]),
 );
 
+// Add dark mode variants to safelist
+const darkModeVariants = baseVariants.map(variant => `dark:${variant}`);
+const darkModeStates = states.map(state => `dark:${state}`);
+
 export const generateSafelist = () => {
   const safelist: Set<string> = new Set();
+  
+  // Add dark mode classes
+  safelist.add('dark');
+  darkModeVariants.forEach(variant => safelist.add(variant));
+  darkModeStates.forEach(state => safelist.add(state));
 
   // Helper to add class with all its variants
   const addClassWithVariants = (baseClass: string) => {

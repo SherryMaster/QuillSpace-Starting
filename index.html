@@ -9,5 +9,15 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Immediately set initial theme to prevent flash
+      (function() {
+        const isDark = localStorage.theme === 'dark' || 
+          (!('theme' in localStorage) && 
+           window.matchMedia('(prefers-color-scheme: dark)').matches);
+        
+        document.documentElement.classList.toggle('dark', isDark);
+      })();
+    </script>
   </body>
 </html>
