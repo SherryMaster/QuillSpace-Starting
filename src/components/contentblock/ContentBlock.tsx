@@ -1,4 +1,13 @@
-import React, { ReactNode, useState, useId, useRef, useEffect, isValidElement, useContext, createElement } from "react";
+import React, {
+  ReactNode,
+  useState,
+  useId,
+  useRef,
+  useEffect,
+  isValidElement,
+  useContext,
+  createElement,
+} from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText,
@@ -24,63 +33,71 @@ import {
   Music,
   Image as ImageIcon,
   Play,
-  Book
+  Book,
 } from "lucide-react";
-import { FileStructureView } from './FileStructureView';
+import { FileStructureView } from "./FileStructureView";
 import { CodeHighlighter } from "./CodeHighlighter";
 import { ExpandedContext } from "@/contexts/ExpandedContext";
-import { MarkdownBlock } from './MarkdownBlock';
-import { IconProps } from '@/utils/iconUtils';
-import { cn } from '@/utils/common';
-import { type ColorToken } from '@/types/colors';
-import { getColorClass } from '@/utils/colors';
-import type { MediaType, VideoBlockProps, MediaBlockProps as BaseMediaBlockProps, VideoTimestamp } from '@/types/media';
-import { MediaBlock } from './MediaBlock';
+import { MarkdownBlock } from "./MarkdownBlock";
+import { IconProps } from "@/utils/iconUtils";
+import { cn } from "@/utils/common";
+import { type ColorToken } from "@/types/colors";
+import { getColorClass } from "@/utils/colors";
+import type {
+  MediaType,
+  VideoBlockProps,
+  MediaBlockProps as BaseMediaBlockProps,
+  VideoTimestamp,
+} from "@/types/media";
+import { MediaBlock } from "./MediaBlock";
 import { removeCommonIndentation } from "@/utils/common";
-import { GlossaryBlock } from './GlossaryBlock';
+import { GlossaryBlock } from "./GlossaryBlock";
 
 const defaultBlockColors = {
-  Classic: 'gray',
-  Generic: 'gray',
-  Note: 'blue',
-  FileStructureView: 'green',
-  Challenge: 'blue',
-  Code: 'cyan',
-  Markdown: 'gray',
-  Media: 'purple',
-  Glossary: 'purple',
+  Classic: "gray",
+  Generic: "gray",
+  Note: "blue",
+  FileStructureView: "green",
+  Challenge: "blue",
+  Code: "cyan",
+  Markdown: "gray",
+  Media: "purple",
+  Glossary: "purple",
 } as const;
 
-export const mediaTypeConfig: Record<MediaType, {
-  icon: LucideIcon;
-  containerClass: string;
-  badgeClass: string;
-  iconProps?: Partial<IconProps>;
-}> = {
+export const mediaTypeConfig: Record<
+  MediaType,
+  {
+    icon: LucideIcon;
+    containerClass: string;
+    badgeClass: string;
+    iconProps?: Partial<IconProps>;
+  }
+> = {
   Video: {
     icon: Film,
     containerClass: "border-purple-500/20 bg-purple-500/5",
     badgeClass: "bg-purple-500/10 text-purple-500",
-    iconProps: { size: 16 }
+    iconProps: { size: 16 },
   },
   Audio: {
     icon: Music,
     containerClass: "border-blue-500/20 bg-blue-500/5",
     badgeClass: "bg-blue-500/10 text-blue-500",
-    iconProps: { size: 16 }
+    iconProps: { size: 16 },
   },
   Image: {
     icon: ImageIcon,
     containerClass: "border-green-500/20 bg-green-500/5",
     badgeClass: "bg-green-500/10 text-green-500",
-    iconProps: { size: 16 }
+    iconProps: { size: 16 },
   },
   GIF: {
     icon: Play,
     containerClass: "border-yellow-500/20 bg-yellow-500/5",
     badgeClass: "bg-yellow-500/10 text-yellow-500",
-    iconProps: { size: 16 }
-  }
+    iconProps: { size: 16 },
+  },
 };
 
 export interface IconConfig {
@@ -102,7 +119,7 @@ interface FeatureStats {
   challenges: number;
   projects: number;
   items: {
-    type: 'Challenge' | 'Project';
+    type: "Challenge" | "Project";
     title: string;
     id: string;
   }[];
@@ -122,7 +139,7 @@ export interface BaseBlockProps {
 }
 
 // Update ClassicBlockProps
-interface ClassicBlockProps extends Omit<BaseBlockProps, 'color'> {
+interface ClassicBlockProps extends Omit<BaseBlockProps, "color"> {
   type: "Classic";
   features?: boolean;
   parentId?: string;
@@ -131,7 +148,7 @@ interface ClassicBlockProps extends Omit<BaseBlockProps, 'color'> {
 // Generic extends Classic with color options
 interface GenericBlockProps extends Omit<ClassicBlockProps, "type"> {
   type: "Generic";
-  color?: ColorToken;  // Add the color property
+  color?: ColorToken; // Add the color property
 }
 
 // All other blocks extend Generic
@@ -170,7 +187,7 @@ interface MediaBlockProps extends BaseBlockProps {
   type: "Media";
   title: string;
   mediaType: MediaType;
-  timestamps?: string | VideoTimestamp[]; 
+  timestamps?: string | VideoTimestamp[];
   timestampsColor?: ColorToken;
   aspectRatio?: string;
   autoPlay?: boolean;
@@ -179,83 +196,93 @@ interface MediaBlockProps extends BaseBlockProps {
 
 interface GlossaryBlockProps extends BaseBlockProps {
   type: "Glossary";
-  dictionary: Record<string, string | {
-    definition: string;
-    category?: string;
-    tags?: string[];
-  }>;
-  layout?: 'grid' | 'list' | 'cards';
+  dictionary: Record<
+    string,
+    | string
+    | {
+        definition: string;
+        category?: string;
+        tags?: string[];
+      }
+  >;
+  layout?: "grid" | "list" | "cards";
   searchPlaceholder?: string;
-  initialSort?: 'asc' | 'desc';
+  initialSort?: "asc" | "desc";
   showCategories?: boolean;
   showTags?: boolean;
-  searchBarPosition?: 'top' | 'sticky';
+  searchBarPosition?: "top" | "sticky";
   animateEntries?: boolean;
   groupByCategory?: boolean;
 }
 
-export type ContentBlockProps = 
-  | ClassicBlockProps 
-  | GenericBlockProps 
+export type ContentBlockProps =
+  | ClassicBlockProps
+  | GenericBlockProps
   | NoteBlockProps
-  | FileStructureBlockProps 
+  | FileStructureBlockProps
   | ChallengeBlockProps
   | CodeBlockProps
   | MarkdownBlockProps
-  | BaseMediaBlockProps  // Replace VideoBlockProps with BaseMediaBlockProps
+  | BaseMediaBlockProps // Replace VideoBlockProps with BaseMediaBlockProps
   | GlossaryBlockProps;
 
-const noteTypeConfig: Record<NoteBlockProps['noteType'], {
+const noteTypeConfig: Record<
+  NoteBlockProps["noteType"],
+  {
     containerClass: string;
     contentClass: string;
     textClass: string;
     bgClass: string;
     iconClass: string;
     icon: LucideIcon;
-}> = {
-    primary: {
-      containerClass: `border-2 ${getColorClass('blue', 'border', 20)} ${getColorClass('blue', 'bg', 5)}`,
-      contentClass: getColorClass('blue', 'bg', 5),
-      textClass: "text-blue-700 dark:text-blue-300",
-      bgClass: getColorClass('blue', 'bg', 10),
-      iconClass: getColorClass('blue', 'text'),
-      icon: InfoIcon
-    },
-    secondary: {
-      containerClass: `border-2 ${getColorClass('gray', 'border', 20)} ${getColorClass('gray', 'bg', 5)}`,
-      contentClass: getColorClass('gray', 'bg', 5),
-      textClass: "text-gray-700 dark:text-gray-300",
-      bgClass: getColorClass('gray', 'bg', 10),
-      iconClass: getColorClass('gray', 'text'),
-      icon: HelpCircle
-    },
-    info: {
-      containerClass: `border-2 ${getColorClass('cyan', 'border', 20)} ${getColorClass('cyan', 'bg', 5)}`,
-      contentClass: getColorClass('cyan', 'bg', 5),
-      textClass: "text-cyan-700 dark:text-cyan-300",
-      bgClass: getColorClass('cyan', 'bg', 10),
-      iconClass: getColorClass('cyan', 'text'),
-      icon: Info
-    },
-    warning: {
-      containerClass: `border-2 ${getColorClass('yellow', 'border', 20)} ${getColorClass('yellow', 'bg', 5)}`,
-      contentClass: getColorClass('yellow', 'bg', 5),
-      textClass: "text-yellow-700 dark:text-yellow-300",
-      bgClass: getColorClass('yellow', 'bg', 10),
-      iconClass: getColorClass('yellow', 'text'),
-      icon: AlertTriangle
-    },
-    critical: {
-      containerClass: `border-2 ${getColorClass('red', 'border', 20)} ${getColorClass('red', 'bg', 5)}`,
-      contentClass: getColorClass('red', 'bg', 5),
-      textClass: "text-red-700 dark:text-red-300",
-      bgClass: getColorClass('red', 'bg', 10),
-      iconClass: getColorClass('red', 'text'),
-      icon: AlertOctagon
-    }
+  }
+> = {
+  primary: {
+    containerClass: `border-2 ${getColorClass("blue", "border", 20)} ${getColorClass("blue", "bg", 5)}`,
+    contentClass: getColorClass("blue", "bg", 5),
+    textClass: "text-blue-700 dark:text-blue-300",
+    bgClass: getColorClass("blue", "bg", 10),
+    iconClass: getColorClass("blue", "text"),
+    icon: InfoIcon,
+  },
+  secondary: {
+    containerClass: `border-2 ${getColorClass("gray", "border", 20)} ${getColorClass("gray", "bg", 5)}`,
+    contentClass: getColorClass("gray", "bg", 5),
+    textClass: "text-gray-700 dark:text-gray-300",
+    bgClass: getColorClass("gray", "bg", 10),
+    iconClass: getColorClass("gray", "text"),
+    icon: HelpCircle,
+  },
+  info: {
+    containerClass: `border-2 ${getColorClass("cyan", "border", 20)} ${getColorClass("cyan", "bg", 5)}`,
+    contentClass: getColorClass("cyan", "bg", 5),
+    textClass: "text-cyan-700 dark:text-cyan-300",
+    bgClass: getColorClass("cyan", "bg", 10),
+    iconClass: getColorClass("cyan", "text"),
+    icon: Info,
+  },
+  warning: {
+    containerClass: `border-2 ${getColorClass("yellow", "border", 20)} ${getColorClass("yellow", "bg", 5)}`,
+    contentClass: getColorClass("yellow", "bg", 5),
+    textClass: "text-yellow-700 dark:text-yellow-300",
+    bgClass: getColorClass("yellow", "bg", 10),
+    iconClass: getColorClass("yellow", "text"),
+    icon: AlertTriangle,
+  },
+  critical: {
+    containerClass: `border-2 ${getColorClass("red", "border", 20)} ${getColorClass("red", "bg", 5)}`,
+    contentClass: getColorClass("red", "bg", 5),
+    textClass: "text-red-700 dark:text-red-300",
+    bgClass: getColorClass("red", "bg", 10),
+    iconClass: getColorClass("red", "text"),
+    icon: AlertOctagon,
+  },
 };
 
-const DEFAULT_BLOCK_ICONS: Record<ContentBlockProps["type"], LucideIcon | ((props: ContentBlockProps) => LucideIcon)> = {
+const DEFAULT_BLOCK_ICONS: Record<
+  ContentBlockProps["type"],
+  LucideIcon | ((props: ContentBlockProps) => LucideIcon)
+> = {
   Classic: Layout,
   Generic: Box,
   Note: (props: ContentBlockProps) => {
@@ -279,7 +306,7 @@ const DEFAULT_BLOCK_ICONS: Record<ContentBlockProps["type"], LucideIcon | ((prop
       const mediaProps = props as MediaBlockProps;
       return mediaTypeConfig[mediaProps.mediaType].icon;
     }
-    return Film;  // Default to Film icon if type check fails
+    return Film; // Default to Film icon if type check fails
   },
   Glossary: Book,
 };
@@ -293,7 +320,7 @@ const getBlockIcon = (props: ContentBlockProps): LucideIcon => {
   const defaultIcon = DEFAULT_BLOCK_ICONS[props.type];
 
   // Handle function-based icons
-  if (typeof defaultIcon === 'function') {
+  if (typeof defaultIcon === "function") {
     const iconResult: LucideIcon = defaultIcon(props) as LucideIcon;
     return iconResult;
   }
@@ -306,7 +333,7 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
   const initialConfig: BlockConfig = {
     icon: Box,
     containerClass: "bg-background",
-    badgeClass: "bg-primary/10 text-primary"
+    badgeClass: "bg-primary/10 text-primary",
   };
 
   // Add media block configuration
@@ -320,68 +347,107 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
       badgeClass: mediaConfig.badgeClass,
       iconProps: {
         icon: mediaConfig.icon,
-        ...mediaConfig.iconProps
-      }
+        ...mediaConfig.iconProps,
+      },
     };
   }
 
   const icon = getBlockIcon(props);
-  
+
   const blockConfigs: Record<ContentBlockProps["type"], BlockConfig> = {
     Classic: {
       icon,
-      containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
-      badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text'),
+      containerClass:
+        getColorClass("gray", "border", 20) +
+        " " +
+        getColorClass("gray", "bg", 5),
+      badgeClass:
+        getColorClass("gray", "bg", 10) + " " + getColorClass("gray", "text"),
       iconProps: {
         icon,
         size: props.iconConfig?.size || 20,
         className: cn(
           "w-5 h-5",
-          props.iconConfig?.color && getColorClass(props.iconConfig.color, 'text'),
-          props.iconConfig?.className
-        )
-      }
+          props.iconConfig?.color &&
+            getColorClass(props.iconConfig.color, "text"),
+          props.iconConfig?.className,
+        ),
+      },
     },
     Generic: {
       icon,
-      containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
-      badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text')
+      containerClass:
+        getColorClass("gray", "border", 20) +
+        " " +
+        getColorClass("gray", "bg", 5),
+      badgeClass:
+        getColorClass("gray", "bg", 10) + " " + getColorClass("gray", "text"),
     },
     Glossary: {
       icon,
-      containerClass: getColorClass('purple', 'border', 20) + ' ' + getColorClass('purple', 'bg', 5),
-      badgeClass: getColorClass('purple', 'bg', 10) + ' ' + getColorClass('purple', 'text')
+      containerClass:
+        getColorClass("purple", "border", 20) +
+        " " +
+        getColorClass("purple", "bg", 5),
+      badgeClass:
+        getColorClass("purple", "bg", 10) +
+        " " +
+        getColorClass("purple", "text"),
     },
     Note: {
       icon,
-      containerClass: getColorClass('blue', 'border', 20) + ' ' + getColorClass('blue', 'bg', 5),
-      badgeClass: getColorClass('blue', 'bg', 10) + ' ' + getColorClass('blue', 'text')
+      containerClass:
+        getColorClass("blue", "border", 20) +
+        " " +
+        getColorClass("blue", "bg", 5),
+      badgeClass:
+        getColorClass("blue", "bg", 10) + " " + getColorClass("blue", "text"),
     },
     FileStructureView: {
       icon,
-      containerClass: getColorClass('green', 'border', 20) + ' ' + getColorClass('green', 'bg', 5),
-      badgeClass: getColorClass('green', 'bg', 10) + ' ' + getColorClass('green', 'text')
+      containerClass:
+        getColorClass("green", "border", 20) +
+        " " +
+        getColorClass("green", "bg", 5),
+      badgeClass:
+        getColorClass("green", "bg", 10) + " " + getColorClass("green", "text"),
     },
     Challenge: {
       icon,
-      containerClass: getColorClass('blue', 'border', 20) + ' ' + getColorClass('blue', 'bg', 5),
-      badgeClass: getColorClass('blue', 'bg', 10) + ' ' + getColorClass('blue', 'text')
+      containerClass:
+        getColorClass("blue", "border", 20) +
+        " " +
+        getColorClass("blue", "bg", 5),
+      badgeClass:
+        getColorClass("blue", "bg", 10) + " " + getColorClass("blue", "text"),
     },
     Code: {
       icon,
-      containerClass: getColorClass('cyan', 'border', 20) + ' ' + getColorClass('cyan', 'bg', 5),
-      badgeClass: getColorClass('cyan', 'bg', 10) + ' ' + getColorClass('cyan', 'text')
+      containerClass:
+        getColorClass("cyan", "border", 20) +
+        " " +
+        getColorClass("cyan", "bg", 5),
+      badgeClass:
+        getColorClass("cyan", "bg", 10) + " " + getColorClass("cyan", "text"),
     },
     Markdown: {
       icon,
-      containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
-      badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text')
+      containerClass:
+        getColorClass("gray", "border", 20) +
+        " " +
+        getColorClass("gray", "bg", 5),
+      badgeClass:
+        getColorClass("gray", "bg", 10) + " " + getColorClass("gray", "text"),
     },
     Media: {
       icon,
-      containerClass: getColorClass('gray', 'border', 20) + ' ' + getColorClass('gray', 'bg', 5),
-      badgeClass: getColorClass('gray', 'bg', 10) + ' ' + getColorClass('gray', 'text')
-    }
+      containerClass:
+        getColorClass("gray", "border", 20) +
+        " " +
+        getColorClass("gray", "bg", 5),
+      badgeClass:
+        getColorClass("gray", "bg", 10) + " " + getColorClass("gray", "text"),
+    },
   };
 
   let config = { ...blockConfigs[props.type] };
@@ -392,12 +458,14 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
     config = {
       ...config,
       icon: getBlockIcon(props),
-      containerClass: challengeProps.challengeType === "Project" 
-        ? "border-2 border-purple-500/20 bg-purple-500/5"
-        : "border-2 border-blue-500/20 bg-blue-500/5",
-      badgeClass: challengeProps.challengeType === "Project"
-        ? "bg-purple-500/10 text-purple-500"
-        : "bg-blue-500/10 text-blue-500"
+      containerClass:
+        challengeProps.challengeType === "Project"
+          ? "border-2 border-purple-500/20 bg-purple-500/5"
+          : "border-2 border-blue-500/20 bg-blue-500/5",
+      badgeClass:
+        challengeProps.challengeType === "Project"
+          ? "bg-purple-500/10 text-purple-500"
+          : "bg-blue-500/10 text-blue-500",
     };
   }
 
@@ -407,7 +475,7 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
     config = {
       ...config,
       containerClass: `border-${color}/20 bg-${color}/5`,
-      badgeClass: `bg-${color}/10 text-${color}`
+      badgeClass: `bg-${color}/10 text-${color}`,
     };
   }
 
@@ -422,22 +490,20 @@ const getBlockConfig = (props: ContentBlockProps): BlockConfig => {
       iconProps: {
         icon: noteConfig.icon,
         className: cn("w-5 h-5", noteConfig.iconClass),
-        size: props.iconConfig?.size || 20
-      }
+        size: props.iconConfig?.size || 20,
+      },
     };
   }
 
   return config;
 };
 
-
-
 // Add a utility function to calculate feature stats
 function calculateFeatureStats(children: ReactNode): FeatureStats {
   const stats: FeatureStats = {
     challenges: 0,
     projects: 0,
-    items: []
+    items: [],
   };
 
   const processNode = (node: ReactNode) => {
@@ -445,22 +511,22 @@ function calculateFeatureStats(children: ReactNode): FeatureStats {
 
     if (isValidElement(node)) {
       const props = node.props as ContentBlockProps;
-      
-      if (props.type === 'Challenge') {
+
+      if (props.type === "Challenge") {
         const challengeProps = props as ChallengeBlockProps;
-        if (challengeProps.challengeType === 'Project') {
+        if (challengeProps.challengeType === "Project") {
           stats.projects++;
           stats.items.push({
-            type: 'Project',
+            type: "Project",
             title: props.title,
-            id: props.id || `project-${stats.projects}`
+            id: props.id || `project-${stats.projects}`,
           });
         } else {
           stats.challenges++;
           stats.items.push({
-            type: 'Challenge',
+            type: "Challenge",
             title: props.title,
-            id: props.id || `challenge-${stats.challenges}`
+            id: props.id || `challenge-${stats.challenges}`,
           });
         }
       }
@@ -491,7 +557,7 @@ function FeatureBadge({ stats }: { stats: FeatureStats }) {
   const handleItemClick = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: "smooth" });
       setIsOpen(false);
     }
   };
@@ -499,33 +565,34 @@ function FeatureBadge({ stats }: { stats: FeatureStats }) {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (badgeRef.current && !badgeRef.current.contains(event.target as Node)) {
+      if (
+        badgeRef.current &&
+        !badgeRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   if (stats.challenges === 0 && stats.projects === 0) return null;
 
   return (
     <div className="relative" ref={badgeRef}>
-      <div 
-        className="flex gap-2 cursor-pointer"
-        onClick={handleClick}
-      >
+      <div className="flex gap-2 cursor-pointer" onClick={handleClick}>
         {stats.challenges > 0 && (
           <Badge variant="default">
             <Target className="w-3 h-3" />
-            {stats.challenges} {stats.challenges === 1 ? 'Challenge' : 'Challenges'}
+            {stats.challenges}{" "}
+            {stats.challenges === 1 ? "Challenge" : "Challenges"}
           </Badge>
         )}
         {stats.projects > 0 && (
           <Badge variant="default">
             <Rocket className="w-3 h-3" />
-            {stats.projects} {stats.projects === 1 ? 'Project' : 'Projects'}
+            {stats.projects} {stats.projects === 1 ? "Project" : "Projects"}
           </Badge>
         )}
       </div>
@@ -539,7 +606,7 @@ function FeatureBadge({ stats }: { stats: FeatureStats }) {
                 className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-accent flex items-center gap-2"
                 onClick={() => handleItemClick(item.id)}
               >
-                {item.type === 'Challenge' ? (
+                {item.type === "Challenge" ? (
                   <Target className="w-4 h-4" />
                 ) : (
                   <Rocket className="w-4 h-4" />
@@ -556,12 +623,12 @@ function FeatureBadge({ stats }: { stats: FeatureStats }) {
 
 export function ContentBlock(props: ContentBlockProps) {
   const blockId = useId();
-  const [parentId, setParentId] = useState<string>('');
+  const [parentId, setParentId] = useState<string>("");
   const { expandedBlocks, setExpandedBlocks } = useContext(ExpandedContext);
   const [isLocalExpanded, setIsLocalExpanded] = useState(true);
   const config = getBlockConfig(props);
   const showOnTOC = props.showOnTOC ?? true;
-  const features = props.type === "Classic" ? props.features ?? false : false;
+  const features = props.type === "Classic" ? (props.features ?? false) : false;
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
@@ -573,10 +640,12 @@ export function ContentBlock(props: ContentBlockProps) {
   const isExpanded = isLocalExpanded || expandedBlocks.has(blockId);
 
   const findParentBlockId = (element: HTMLElement | null): string => {
-    if (!element) return '';
-    const parentSection = element.parentElement?.closest('section.content-block');
-    if (!parentSection) return '';
-    return parentSection.id || '';
+    if (!element) return "";
+    const parentSection = element.parentElement?.closest(
+      "section.content-block",
+    );
+    if (!parentSection) return "";
+    return parentSection.id || "";
   };
 
   useEffect(() => {
@@ -590,10 +659,10 @@ export function ContentBlock(props: ContentBlockProps) {
   }, []);
 
   const toggleExpanded = () => {
-    setIsLocalExpanded(prev => !prev);
-    
+    setIsLocalExpanded((prev) => !prev);
+
     if (expandedBlocks.has(blockId)) {
-      setExpandedBlocks(prev => {
+      setExpandedBlocks((prev) => {
         const newSet = new Set(prev);
         newSet.delete(blockId);
         return newSet;
@@ -607,8 +676,7 @@ export function ContentBlock(props: ContentBlockProps) {
         await navigator.clipboard.writeText((props as CodeBlockProps).code);
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
-      } catch (err) {
-      }
+      } catch (err) {}
     }
   };
 
@@ -619,21 +687,33 @@ export function ContentBlock(props: ContentBlockProps) {
         return (
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
-              <Badge 
+              <Badge
                 variant="default"
-                color={challengeProps.challengeType === 'Project' ? 'purple' : 'blue'}
+                color={
+                  challengeProps.challengeType === "Project" ? "purple" : "blue"
+                }
               >
-                {challengeProps.challengeType === 'Project' ? (
-                  <><Rocket className="w-3.5 h-3.5" /> Project</>
+                {challengeProps.challengeType === "Project" ? (
+                  <>
+                    <Rocket className="w-3.5 h-3.5" /> Project
+                  </>
                 ) : (
-                  <><Target className="w-3.5 h-3.5" /> Exercise</>
+                  <>
+                    <Target className="w-3.5 h-3.5" /> Exercise
+                  </>
                 )}
               </Badge>
-              
-              <Badge variant="default" color={
-                challengeProps.difficulty === 'Beginner' ? 'green' :
-                challengeProps.difficulty === 'Intermediate' ? 'yellow' : 'red'
-              }>
+
+              <Badge
+                variant="default"
+                color={
+                  challengeProps.difficulty === "Beginner"
+                    ? "green"
+                    : challengeProps.difficulty === "Intermediate"
+                      ? "yellow"
+                      : "red"
+                }
+              >
                 {challengeProps.difficulty}
               </Badge>
 
@@ -689,33 +769,33 @@ export function ContentBlock(props: ContentBlockProps) {
 
   const getBlockColor = (props: ContentBlockProps): string => {
     if (props.type === "Media") {
-      return `text-${mediaTypeConfig[(props as MediaBlockProps).mediaType].badgeClass.split('-')[1]}`;
+      return `text-${mediaTypeConfig[(props as MediaBlockProps).mediaType].badgeClass.split("-")[1]}`;
     }
-    
+
     if (props.type === "Note") {
       return noteTypeConfig[(props as NoteBlockProps).noteType].iconClass;
     }
-    
+
     if (props.type === "Challenge") {
-      return (props as ChallengeBlockProps).challengeType === "Project" 
+      return (props as ChallengeBlockProps).challengeType === "Project"
         ? "text-purple-500"
         : "text-blue-500";
     }
-    
+
     if (props.type === "Generic") {
       const genericProps = props as GenericBlockProps;
       if (genericProps.color) {
         return `text-${genericProps.color}-500`;
       }
     }
-    
+
     return `text-${defaultBlockColors[props.type]}-500`;
   };
 
   const getBlockClassName = (props: ContentBlockProps): string => {
     // Early return for Classic blocks with no styling
     if (props.type === "Classic") {
-      return props.className || '';
+      return props.className || "";
     }
 
     // Handle Note blocks
@@ -725,65 +805,70 @@ export function ContentBlock(props: ContentBlockProps) {
 
     // Handle Challenge blocks
     if (props.type === "Challenge") {
-      const color = (props as ChallengeBlockProps).challengeType === "Project" ? "purple" : "blue";
+      const color =
+        (props as ChallengeBlockProps).challengeType === "Project"
+          ? "purple"
+          : "blue";
       return cn(
-        getColorClass(color, 'bg', 5),
-        getColorClass(color, 'border', 20)
+        getColorClass(color, "bg", 5),
+        getColorClass(color, "border", 20),
       );
     }
 
     // Handle Media blocks
     if (props.type === "Media") {
-      return mediaTypeConfig[(props as MediaBlockProps).mediaType]?.containerClass;
+      return mediaTypeConfig[(props as MediaBlockProps).mediaType]
+        ?.containerClass;
     }
 
     // Handle custom colors for all non-Classic blocks
     if (props.color) {
       return cn(
-        getColorClass(props.color, 'bg', 5),
-        getColorClass(props.color, 'border', 20)
+        getColorClass(props.color, "bg", 5),
+        getColorClass(props.color, "border", 20),
       );
     }
 
     // Default colors for block types
     const defaultColor = defaultBlockColors[props.type];
     return cn(
-      getColorClass(defaultColor, 'bg', 5),
-      getColorClass(defaultColor, 'border', 20)
+      getColorClass(defaultColor, "bg", 5),
+      getColorClass(defaultColor, "border", 20),
     );
   };
 
   const blockAttributes = {
     id: blockId,
-    'data-block-id': blockId,
-    'data-block-type': props.type,
-    'data-show-toc': showOnTOC,
-    'data-parent-id': parentId,
-    'data-block-icon': config.icon.displayName || config.icon.name || 'Box',
-    'data-block-color': getBlockColor(props),
+    "data-block-id": blockId,
+    "data-block-type": props.type,
+    "data-show-toc": showOnTOC,
+    "data-parent-id": parentId,
+    "data-block-icon": config.icon.displayName || config.icon.name || "Box",
+    "data-block-color": getBlockColor(props),
     ...(props.type === "Note" && {
-      'data-note-type': (props as NoteBlockProps).noteType,
-      'data-note-icon': noteTypeConfig[(props as NoteBlockProps).noteType].icon.name
+      "data-note-type": (props as NoteBlockProps).noteType,
+      "data-note-icon":
+        noteTypeConfig[(props as NoteBlockProps).noteType].icon.name,
     }),
     ...(props.type === "Media" && {
-      'data-media-type': (props as MediaBlockProps).mediaType,
+      "data-media-type": (props as MediaBlockProps).mediaType,
     }),
     className: cn(
-      'content-block',
+      "content-block",
       props.type !== "Classic" && "border-2 p-6 backdrop-blur-sm rounded-lg",
       getBlockClassName(props),
-      props.className
+      props.className,
     ),
     style: {
-      '--block-depth': parentId ? '1' : '0'
-    } as React.CSSProperties
+      "--block-depth": parentId ? "1" : "0",
+    } as React.CSSProperties,
   };
 
   const featureStats = features ? calculateFeatureStats(props.children) : null;
 
   return (
     <section {...blockAttributes}>
-    {/* <section className="content-block border-2 p-6 backdrop-blur-sm rounded-lg border-gray-500/20 bg-gray-500/5">  */}
+      {/* <section className="content-block border-2 p-6 backdrop-blur-sm rounded-lg border-gray-500/20 bg-gray-500/5">  */}
       {/* Header */}
       <div className="flex w-full items-start justify-between gap-4">
         <div className="space-y-4 flex-1">
@@ -791,44 +876,41 @@ export function ContentBlock(props: ContentBlockProps) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               {/* Fix the icon rendering here */}
-              {props.type === "Note" ? (
-                // Special handling for Note type icons
-                createElement(
-                  props.iconConfig?.icon || noteTypeConfig[(props as NoteBlockProps).noteType].icon,
-                  {
-                    className: cn(
-                      "w-5 h-5",
-                      props.iconConfig?.className || noteTypeConfig[(props as NoteBlockProps).noteType].iconClass
-                    ),
-                    'aria-label': props.iconConfig?.ariaLabel || `${props.title} icon`,
-                    size: props.iconConfig?.size || 20
-                  }
-                )
-              ) : (
-                // Regular icon rendering for other types
-                createElement(config.icon, {
-                  ...config.iconProps,
-                  'aria-label': props.iconConfig?.ariaLabel || `${props.title} icon`,
-                  className: cn(
-                    config.iconProps?.className
+              {props.type === "Note"
+                ? // Special handling for Note type icons
+                  createElement(
+                    props.iconConfig?.icon ||
+                      noteTypeConfig[(props as NoteBlockProps).noteType].icon,
+                    {
+                      className: cn(
+                        "w-5 h-5",
+                        props.iconConfig?.className ||
+                          noteTypeConfig[(props as NoteBlockProps).noteType]
+                            .iconClass,
+                      ),
+                      "aria-label":
+                        props.iconConfig?.ariaLabel || `${props.title} icon`,
+                      size: props.iconConfig?.size || 20,
+                    },
                   )
-                })
-              )}
+                : // Regular icon rendering for other types
+                  createElement(config.icon, {
+                    ...config.iconProps,
+                    "aria-label":
+                      props.iconConfig?.ariaLabel || `${props.title} icon`,
+                    className: cn(config.iconProps?.className),
+                  })}
               <h4 role="heading" className="text-lg font-semibold">
                 {props.title}
               </h4>
             </div>
             {props.subtitle && (
-              <p className="text-sm text-muted-foreground">
-                {props.subtitle}
-              </p>
+              <p className="text-sm text-muted-foreground">{props.subtitle}</p>
             )}
           </div>
 
           {/* Badges */}
-          <div className="flex flex-wrap gap-2">
-            {renderBlockBadges()}
-          </div>
+          <div className="flex flex-wrap gap-2">{renderBlockBadges()}</div>
 
           {/* Description */}
           {props.description && (
@@ -853,32 +935,41 @@ export function ContentBlock(props: ContentBlockProps) {
       </div>
 
       {/* Content */}
-      <div className={`mt-6 transition-all duration-200 ${
-        isExpanded 
-          ? "opacity-100 visible" 
-          : "opacity-0 invisible h-0 overflow-hidden"
-      }`}>
+      <div
+        className={`mt-6 transition-all duration-200 ${
+          isExpanded
+            ? "opacity-100 visible"
+            : "opacity-0 invisible h-0 overflow-hidden"
+        }`}
+      >
         {/* Block's own content based on type */}
         <div className="space-y-4">
           {props.type === "Note" && (
-            <div className={cn(
-              "rounded-lg p-4",
-              noteTypeConfig[(props as NoteBlockProps).noteType].contentClass
-            )}>
-              <div className={cn(
-                "text-base",
-                noteTypeConfig[(props as NoteBlockProps).noteType].textClass
-              )}>
+            <div
+              className={cn(
+                "rounded-lg p-4",
+                noteTypeConfig[(props as NoteBlockProps).noteType].contentClass,
+              )}
+            >
+              <div
+                className={cn(
+                  "text-base",
+                  noteTypeConfig[(props as NoteBlockProps).noteType].textClass,
+                )}
+              >
                 {(props as NoteBlockProps).content}
               </div>
             </div>
           )}
 
-          {props.type === "FileStructureView" && (props as FileStructureBlockProps).filestructure && (
-            <div className="rounded-lg bg-black p-4">
-              <FileStructureView structure={(props as FileStructureBlockProps).filestructure} />
-            </div>
-          )}
+          {props.type === "FileStructureView" &&
+            (props as FileStructureBlockProps).filestructure && (
+              <div className="rounded-lg bg-black p-4">
+                <FileStructureView
+                  structure={(props as FileStructureBlockProps).filestructure}
+                />
+              </div>
+            )}
 
           {props.type === "Code" && (
             <div className="rounded-lg overflow-hidden relative group">
@@ -904,59 +995,60 @@ export function ContentBlock(props: ContentBlockProps) {
 
           {props.type === "Markdown" && (
             <div className="prose dark:prose-invert max-w-none">
-              <MarkdownBlock content={removeCommonIndentation((props as MarkdownBlockProps).content)} />
+              <MarkdownBlock
+                content={removeCommonIndentation(
+                  (props as MarkdownBlockProps).content,
+                )}
+              />
             </div>
           )}
 
           {props.type === "Media" && (
             <MediaBlock
-              {...(props.type === "Media" && props.mediaType === "Video" 
+              {...(props.type === "Media" && props.mediaType === "Video"
                 ? {
                     ...(props as VideoBlockProps),
-                    ...(('timestamps' in props && !('multiVideo' in props)) 
+                    ...("timestamps" in props && !("multiVideo" in props)
                       ? {
-                          timestamps: typeof props.timestamps === 'string'
-                            ? removeCommonIndentation(props.timestamps)
-                            : props.timestamps
-                        } 
+                          timestamps:
+                            typeof props.timestamps === "string"
+                              ? removeCommonIndentation(props.timestamps)
+                              : props.timestamps,
+                        }
                       : {}),
-                    ...(('multiVideo' in props) 
+                    ...("multiVideo" in props
                       ? {
                           multiVideo: {
                             ...(props as any).multiVideo,
-                            timestamps: (props as any).multiVideo?.timestamps?.map(
+                            timestamps: (
+                              props as any
+                            ).multiVideo?.timestamps?.map(
                               (timestamp: string | VideoTimestamp[]) =>
-                                typeof timestamp === 'string'
+                                typeof timestamp === "string"
                                   ? removeCommonIndentation(timestamp)
-                                  : timestamp
-                            )
-                          }
+                                  : timestamp,
+                            ),
+                          },
                         }
-                      : {})
+                      : {}),
                   }
                 : props)} // Remove the explicit cast to BaseMediaBlockProps
             />
           )}
 
           {props.type === "Glossary" && (
-            <GlossaryBlock 
-              {...props as GlossaryBlockProps}
-            />
+            <GlossaryBlock {...(props as GlossaryBlockProps)} />
           )}
 
           {/* Children content */}
           {props.children && (
-            <div className="mt-8 space-y-6">
-              {props.children}
-            </div>
+            <div className="mt-8 space-y-6">{props.children}</div>
           )}
         </div>
 
         {/* Footer */}
         {props.footer && (
-          <div className="mt-8 pt-4 border-t">
-            {props.footer}
-          </div>
+          <div className="mt-8 pt-4 border-t">{props.footer}</div>
         )}
 
         {/* Feature Stats */}
@@ -984,8 +1076,7 @@ export class ErrorBoundary extends React.Component<
     return { hasError: true };
   }
 
-  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
-  }
+  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {}
 
   render() {
     if (this.state.hasError) {
@@ -995,5 +1086,3 @@ export class ErrorBoundary extends React.Component<
     return this.props.children;
   }
 }
-
-

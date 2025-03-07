@@ -9,20 +9,24 @@ export interface GlossaryEntry {
 
 export interface GlossaryBlockProps extends BaseBlockProps {
   type: "Glossary";
-  dictionary: Record<string, string | {
-    definition: string;
-    category?: string;
-    tags?: string[];
-  }>;
-  layout?: 'grid' | 'list' | 'cards';
+  dictionary: Record<
+    string,
+    | string
+    | {
+        definition: string;
+        category?: string;
+        tags?: string[];
+      }
+  >;
+  layout?: "grid" | "list" | "cards";
   searchPlaceholder?: string;
-  initialSort?: 'asc' | 'desc';
+  initialSort?: "asc" | "desc";
   showCategories?: boolean;
   showTags?: boolean;
   itemClassName?: string;
   termClassName?: string;
   definitionClassName?: string;
-  searchBarPosition?: 'top' | 'sticky';
+  searchBarPosition?: "top" | "sticky";
   animateEntries?: boolean;
   groupByCategory?: boolean;
 }

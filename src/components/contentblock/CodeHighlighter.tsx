@@ -7,37 +7,37 @@ interface CodeHighlighterProps {
 
 const getLanguage = (extension: string): string => {
   // First, remove the dot if it exists
-  const lang = extension.startsWith('.') ? extension.slice(1) : extension;
+  const lang = extension.startsWith(".") ? extension.slice(1) : extension;
 
   const languageMap: Record<string, string> = {
     // File extensions
-    "js": "javascript",
-    "jsx": "jsx",
-    "ts": "typescript",
-    "tsx": "tsx",
-    "html": "html",
-    "css": "css",
-    "scss": "scss",
-    "py": "python",
-    "java": "java",
-    "rb": "ruby",
-    "php": "php",
-    "go": "go",
-    "rust": "rust",
-    "json": "json",
-    "yml": "yaml",
-    "yaml": "yaml",
-    "xml": "xml",
-    "sql": "sql",
-    "sh": "bash",
-    
+    js: "javascript",
+    jsx: "jsx",
+    ts: "typescript",
+    tsx: "tsx",
+    html: "html",
+    css: "css",
+    scss: "scss",
+    py: "python",
+    java: "java",
+    rb: "ruby",
+    php: "php",
+    go: "go",
+    rust: "rust",
+    json: "json",
+    yml: "yaml",
+    yaml: "yaml",
+    xml: "xml",
+    sql: "sql",
+    sh: "bash",
+
     // Language names
-    "javascript": "javascript",
-    "python": "python",
-    "typescript": "typescript",
-    "ruby": "ruby",
-    "bash": "bash",
-    "shell": "bash",
+    javascript: "javascript",
+    python: "python",
+    typescript: "typescript",
+    ruby: "ruby",
+    bash: "bash",
+    shell: "bash",
   };
 
   return languageMap[lang.toLowerCase()] || "plaintext";

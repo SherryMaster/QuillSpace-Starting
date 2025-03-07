@@ -55,233 +55,233 @@
 }
 
 /* Custom utility classes */
-  .container-base {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
+.container-base {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
 
-  .card-base {
-    @apply rounded-lg border bg-card/30 backdrop-blur-sm 
+.card-base {
+  @apply rounded-lg border bg-card/30 backdrop-blur-sm 
            text-card-foreground shadow-lg transition-all duration-200
            hover:bg-card/40 hover:shadow-xl;
-  }
+}
 
-  .theme-toggle {
-    @apply rounded-full p-2.5 text-foreground/80 bg-background/50
+.theme-toggle {
+  @apply rounded-full p-2.5 text-foreground/80 bg-background/50
            hover:bg-accent/10 hover:text-accent transition-colors
            border border-border/50 backdrop-blur-sm shadow-sm
            focus-visible:outline-none focus-visible:ring-2
            focus-visible:ring-ring;
-  } 
+}
 
-  /* Base gradient heading styles */
+/* Base gradient heading styles */
 @utility gradient-heading-base {
-    @apply rounded-lg shadow-lg backdrop-blur-sm border border-border/20
+  @apply rounded-lg shadow-lg backdrop-blur-sm border border-border/20
            transition-all duration-300 hover:shadow-xl;
-  }
+}
 
-  /* Primary (Blue) gradient */
-  .gradient-heading-blue {
-    @apply gradient-heading-base bg-gradient-to-b from-primary/90 to-primary/60
+/* Primary (Blue) gradient */
+.gradient-heading-blue {
+  @apply gradient-heading-base bg-gradient-to-b from-primary/90 to-primary/60
            text-primary-foreground hover:from-primary hover:to-primary/70;
-  }
+}
 
-  /* Red gradient */
-  .gradient-heading-red {
-    @apply gradient-heading-base bg-gradient-to-b from-red-500/90 to-red-600/60
+/* Red gradient */
+.gradient-heading-red {
+  @apply gradient-heading-base bg-gradient-to-b from-red-500/90 to-red-600/60
            text-white hover:from-red-500 hover:to-red-600/70;
-  }
+}
 
-  /* Green gradient */
-  .gradient-heading-green {
-    @apply gradient-heading-base bg-gradient-to-b from-green-500/90 to-green-600/60
+/* Green gradient */
+.gradient-heading-green {
+  @apply gradient-heading-base bg-gradient-to-b from-green-500/90 to-green-600/60
            text-white hover:from-green-500 hover:to-green-600/70;
-  }
+}
 
-  /* Yellow gradient */
-  .gradient-heading-yellow {
-    @apply gradient-heading-base bg-gradient-to-b from-yellow-400/90 to-yellow-500/60
+/* Yellow gradient */
+.gradient-heading-yellow {
+  @apply gradient-heading-base bg-gradient-to-b from-yellow-400/90 to-yellow-500/60
            text-yellow-900 hover:from-yellow-400 hover:to-yellow-500/70;
-  }
+}
 
-  /* Purple gradient */
-  .gradient-heading-purple {
-    @apply gradient-heading-base bg-gradient-to-b from-purple-500/90 to-purple-600/60
+/* Purple gradient */
+.gradient-heading-purple {
+  @apply gradient-heading-base bg-gradient-to-b from-purple-500/90 to-purple-600/60
            text-white hover:from-purple-500 hover:to-purple-600/70;
-  }
+}
 
-  /* Gray gradient */
-  .gradient-heading-gray {
-    @apply gradient-heading-base bg-gradient-to-b from-gray-500/90 to-gray-600/60
+/* Gray gradient */
+.gradient-heading-gray {
+  @apply gradient-heading-base bg-gradient-to-b from-gray-500/90 to-gray-600/60
            text-white hover:from-gray-500 hover:to-gray-600/70;
-  }
+}
 
-  /* Dark gradient */
-  .gradient-heading-dark {
-    @apply gradient-heading-base bg-gradient-to-b from-gray-800/90 to-gray-900/60
+/* Dark gradient */
+.gradient-heading-dark {
+  @apply gradient-heading-base bg-gradient-to-b from-gray-800/90 to-gray-900/60
            text-white hover:from-gray-800 hover:to-gray-900/70;
-  }
+}
 
-  /* Light gradient */
-  .gradient-heading-light {
-    @apply gradient-heading-base bg-gradient-to-b from-gray-100/90 to-gray-200/60
+/* Light gradient */
+.gradient-heading-light {
+  @apply gradient-heading-base bg-gradient-to-b from-gray-100/90 to-gray-200/60
            text-gray-800 hover:from-gray-100 hover:to-gray-200/70;
-  }
+}
 
-  /* Cyan gradient */
-  .gradient-heading-cyan {
-    @apply gradient-heading-base bg-gradient-to-b from-cyan-500/90 to-cyan-600/60
+/* Cyan gradient */
+.gradient-heading-cyan {
+  @apply gradient-heading-base bg-gradient-to-b from-cyan-500/90 to-cyan-600/60
            text-white hover:from-cyan-500 hover:to-cyan-600/70;
-  }
+}
 
-  /* Orange gradient */
-  .gradient-heading-orange {
-    @apply gradient-heading-base bg-gradient-to-b from-orange-500/90 to-orange-600/60
+/* Orange gradient */
+.gradient-heading-orange {
+  @apply gradient-heading-base bg-gradient-to-b from-orange-500/90 to-orange-600/60
            text-white hover:from-orange-500 hover:to-orange-600/70;
-  }
+}
 
-  /* New gradient styles */
-  /* Pink gradient */
-  .gradient-heading-pink {
-    @apply gradient-heading-base bg-gradient-to-b from-pink-500/90 to-pink-600/60
+/* New gradient styles */
+/* Pink gradient */
+.gradient-heading-pink {
+  @apply gradient-heading-base bg-gradient-to-b from-pink-500/90 to-pink-600/60
            text-white hover:from-pink-500 hover:to-pink-600/70;
-  }
+}
 
-  /* Indigo gradient */
-  .gradient-heading-indigo {
-    @apply gradient-heading-base bg-gradient-to-b from-indigo-500/90 to-indigo-600/60
+/* Indigo gradient */
+.gradient-heading-indigo {
+  @apply gradient-heading-base bg-gradient-to-b from-indigo-500/90 to-indigo-600/60
            text-white hover:from-indigo-500 hover:to-indigo-600/70;
-  }
+}
 
-  /* Teal gradient */
-  .gradient-heading-teal {
-    @apply gradient-heading-base bg-gradient-to-b from-teal-500/90 to-teal-600/60
+/* Teal gradient */
+.gradient-heading-teal {
+  @apply gradient-heading-base bg-gradient-to-b from-teal-500/90 to-teal-600/60
            text-white hover:from-teal-500 hover:to-teal-600/70;
-  }
+}
 
-  /* Rose gradient */
-  .gradient-heading-rose {
-    @apply gradient-heading-base bg-gradient-to-b from-rose-500/90 to-rose-600/60
+/* Rose gradient */
+.gradient-heading-rose {
+  @apply gradient-heading-base bg-gradient-to-b from-rose-500/90 to-rose-600/60
            text-white hover:from-rose-500 hover:to-rose-600/70;
-  }
+}
 
-  /* Lime gradient */
-  .gradient-heading-lime {
-    @apply gradient-heading-base bg-gradient-to-b from-lime-500/90 to-lime-600/60
+/* Lime gradient */
+.gradient-heading-lime {
+  @apply gradient-heading-base bg-gradient-to-b from-lime-500/90 to-lime-600/60
            text-lime-900 hover:from-lime-500 hover:to-lime-600/70;
-  }
+}
 
-  /* Sky gradient */
-  .gradient-heading-sky {
-    @apply gradient-heading-base bg-gradient-to-b from-sky-500/90 to-sky-600/60
+/* Sky gradient */
+.gradient-heading-sky {
+  @apply gradient-heading-base bg-gradient-to-b from-sky-500/90 to-sky-600/60
            text-white hover:from-sky-500 hover:to-sky-600/70;
-  }
+}
 
-  /* Emerald gradient */
-  .gradient-heading-emerald {
-    @apply gradient-heading-base bg-gradient-to-b from-emerald-500/90 to-emerald-600/60
+/* Emerald gradient */
+.gradient-heading-emerald {
+  @apply gradient-heading-base bg-gradient-to-b from-emerald-500/90 to-emerald-600/60
            text-white hover:from-emerald-500 hover:to-emerald-600/70;
-  }
+}
 
-  /* Fuchsia gradient */
-  .gradient-heading-fuchsia {
-    @apply gradient-heading-base bg-gradient-to-b from-fuchsia-500/90 to-fuchsia-600/60
+/* Fuchsia gradient */
+.gradient-heading-fuchsia {
+  @apply gradient-heading-base bg-gradient-to-b from-fuchsia-500/90 to-fuchsia-600/60
            text-white hover:from-fuchsia-500 hover:to-fuchsia-600/70;
-  }
+}
 
-  /* Amber gradient */
-  .gradient-heading-amber {
-    @apply gradient-heading-base bg-gradient-to-b from-amber-500/90 to-amber-600/60
+/* Amber gradient */
+.gradient-heading-amber {
+  @apply gradient-heading-base bg-gradient-to-b from-amber-500/90 to-amber-600/60
            text-amber-900 hover:from-amber-500 hover:to-amber-600/70;
-  }
+}
 
-  /* Violet gradient */
-  .gradient-heading-violet {
-    @apply gradient-heading-base bg-gradient-to-b from-violet-500/90 to-violet-600/60
+/* Violet gradient */
+.gradient-heading-violet {
+  @apply gradient-heading-base bg-gradient-to-b from-violet-500/90 to-violet-600/60
            text-white hover:from-violet-500 hover:to-violet-600/70;
-  }
+}
 
-  /* Slate gradient */
-  .gradient-heading-slate {
-    @apply gradient-heading-base bg-gradient-to-b from-slate-500/90 to-slate-600/60
+/* Slate gradient */
+.gradient-heading-slate {
+  @apply gradient-heading-base bg-gradient-to-b from-slate-500/90 to-slate-600/60
            text-white hover:from-slate-500 hover:to-slate-600/70;
-  }
+}
 
-  /* Stone gradient */
-  .gradient-heading-stone {
-    @apply gradient-heading-base bg-gradient-to-b from-stone-500/90 to-stone-600/60
+/* Stone gradient */
+.gradient-heading-stone {
+  @apply gradient-heading-base bg-gradient-to-b from-stone-500/90 to-stone-600/60
            text-white hover:from-stone-500 hover:to-stone-600/70;
-  }
+}
 
-  /* Zinc gradient */
-  .gradient-heading-zinc {
-    @apply gradient-heading-base bg-gradient-to-b from-zinc-500/90 to-zinc-600/60
+/* Zinc gradient */
+.gradient-heading-zinc {
+  @apply gradient-heading-base bg-gradient-to-b from-zinc-500/90 to-zinc-600/60
            text-white hover:from-zinc-500 hover:to-zinc-600/70;
-  }
+}
 
-  /* Neutral gradient */
-  .gradient-heading-neutral {
-    @apply gradient-heading-base bg-gradient-to-b from-neutral-500/90 to-neutral-600/60
+/* Neutral gradient */
+.gradient-heading-neutral {
+  @apply gradient-heading-base bg-gradient-to-b from-neutral-500/90 to-neutral-600/60
            text-white hover:from-neutral-500 hover:to-neutral-600/70;
-  }
+}
 
-  /* Brown gradient */
-  .gradient-heading-brown {
-    @apply gradient-heading-base bg-gradient-to-b from-[#8B4513]/90 to-[#654321]/60
+/* Brown gradient */
+.gradient-heading-brown {
+  @apply gradient-heading-base bg-gradient-to-b from-[#8B4513]/90 to-[#654321]/60
            text-white hover:from-[#8B4513] hover:to-[#654321]/70;
-  }
+}
 
-  .difficulty-badge {
-    @apply rounded-full px-3 py-1 text-sm font-medium;
-  }
+.difficulty-badge {
+  @apply rounded-full px-3 py-1 text-sm font-medium;
+}
 
-  .difficulty-beginner {
-    @apply bg-green-500/10 text-green-500;
-  }
+.difficulty-beginner {
+  @apply bg-green-500/10 text-green-500;
+}
 
-  .difficulty-intermediate {
-    @apply bg-yellow-500/10 text-yellow-500;
-  }
+.difficulty-intermediate {
+  @apply bg-yellow-500/10 text-yellow-500;
+}
 
-  .difficulty-advanced {
-    @apply bg-red-500/10 text-red-500;
-  }
+.difficulty-advanced {
+  @apply bg-red-500/10 text-red-500;
+}
 
-  /* Base challenge container styles */
-  .challenge-container {
-    @apply relative isolate overflow-hidden transition-all duration-300;
-  }
+/* Base challenge container styles */
+.challenge-container {
+  @apply relative isolate overflow-hidden transition-all duration-300;
+}
 
-  /* Exercise-type challenge styles (blue theme) */
-  .challenge-container[data-type="Exercise"]::before {
-    @apply absolute inset-0 -z-10 bg-gradient-to-br from-blue-500/5 to-transparent
+/* Exercise-type challenge styles (blue theme) */
+.challenge-container[data-type="Exercise"]::before {
+  @apply absolute inset-0 -z-10 bg-gradient-to-br from-blue-500/5 to-transparent
            opacity-50 transition-opacity duration-300 content-[''];
-  }
+}
 
-  .challenge-container[data-type="Exercise"]:hover::before {
-    @apply opacity-100;
-  }
+.challenge-container[data-type="Exercise"]:hover::before {
+  @apply opacity-100;
+}
 
-  /* Project-type challenge styles (purple theme) */
-  .challenge-container[data-type="Project"]::before {
-    @apply absolute inset-0 -z-10 bg-gradient-to-br from-purple-500/5 to-transparent
+/* Project-type challenge styles (purple theme) */
+.challenge-container[data-type="Project"]::before {
+  @apply absolute inset-0 -z-10 bg-gradient-to-br from-purple-500/5 to-transparent
            opacity-50 transition-opacity duration-300 content-[''];
-  }
+}
 
-  .challenge-container[data-type="Project"]:hover::before {
-    @apply opacity-100;
-  }
+.challenge-container[data-type="Project"]:hover::before {
+  @apply opacity-100;
+}
 
-  .toc-container {
-    @apply transition-all duration-300 hover:shadow-lg;
-  }
+.toc-container {
+  @apply transition-all duration-300 hover:shadow-lg;
+}
 
-  .chapter-container {
-    @apply relative border-b border-border/20 pb-8 mb-8;
-  }
+.chapter-container {
+  @apply relative border-b border-border/20 pb-8 mb-8;
+}
 
-  .chapter-container:last-child {
-    @apply border-b-0 pb-0 mb-0;
-  }
+.chapter-container:last-child {
+  @apply border-b-0 pb-0 mb-0;
+}
 /* Base styles */
 @layer base {
   * {
@@ -360,16 +360,22 @@
   .animate-wave {
     @apply relative overflow-hidden;
     &::after {
-      content: '';
+      content: "";
       @apply absolute inset-0 bg-blue-500/10;
       animation: wave 1.5s infinite;
     }
   }
 
   @keyframes wave {
-    0% { transform: translateX(-100%); }
-    50% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
   }
 
   /* Media block theme variations */
@@ -390,7 +396,7 @@
   }
 }
 
-  /* Add text truncation utilities */
+/* Add text truncation utilities */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -450,10 +456,10 @@
 
 /* Hide main scrollbar but keep functionality */
 .hide-main-scrollbar {
-  scrollbar-width: none;  /* Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
 .hide-main-scrollbar::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
+  display: none; /* Chrome, Safari and Opera */
 }

@@ -112,7 +112,7 @@ export const javascript_timestamps = `
 15:11:43 - Fetching Data from APIs
 15:18:31 - Error Handling
 15:22:43 - Outro
-`
+`;
 
 export const javascript_dsa_timestamps = `
 
@@ -212,7 +212,7 @@ export const javascript_dsa_timestamps = `
 5:29:15 - Creating Merge
 5:35:44 - Creating Merge Sort
 5:38:32 - Outro
-`
+`;
 
 export const typescript_timestamps = `
 00:00 - Intro
@@ -246,7 +246,7 @@ export const typescript_timestamps = `
 3:14:11 - TypeScript With Axios
 3:22:48 - TypeScript With Express
 03:27:09 - Outro
-`
+`;
 
 export const react_part_1_timestamps = `
 00:00 - Trailer
@@ -359,7 +359,7 @@ export const react_part_1_timestamps = `
 10:37:50 - React with TypeScript Project 3
 11:21:20 - React with TypeScript Project 4
 12:41:45 - Outro
-`
+`;
 
 export const react_part_2_timestamps = `
 00:00 - Trailer
@@ -460,7 +460,7 @@ export const react_part_2_timestamps = `
 9:58:36 - Redux Toolkit
 10:31:06 - Redux Toolkit Query ( RTK Query )
 11:15:47 - Outro
-`
+`;
 
 export const react_part_3_timestamps = `
 00:00 - Trailer
@@ -564,7 +564,7 @@ export const react_part_3_timestamps = `
 9:18:31 - All findAllBys
 9:27:43 - Testing User Interactions
 9:48:28 - Outro
-`
+`;
 
 export const react_part_4_timestamps = `
 
@@ -638,4 +638,4 @@ export const react_part_4_timestamps = `
 6:15:55 - MERN Auth Setup ( Legacy )
 6:38:29 - Building A Complete MERN Stack Auth System ( Legacy )
 10:33:14 - Outro
-`
+`;

@@ -1,9 +1,9 @@
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import { CodeHighlighter } from './CodeHighlighter';
-import { Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { CodeHighlighter } from "./CodeHighlighter";
+import { Copy, Check } from "lucide-react";
+import { useState } from "react";
 
 interface MarkdownBlockProps {
   content: string;
@@ -31,8 +31,7 @@ function CodeBlockWrapper({ children, code, language }: CodeBlockWrapperProps) {
       await navigator.clipboard.writeText(code);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
-    } catch (err) {
-    }
+    } catch (err) {}
   };
 
   return (
@@ -75,9 +74,7 @@ export function MarkdownBlock({ content }: MarkdownBlockProps) {
           </h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-2xl font-bold my-4">
-            {children}
-          </h3>
+          <h3 className="text-2xl font-bold my-4">{children}</h3>
         ),
         h4: ({ children }) => (
           <h4 className="text-xl font-semibold my-3 text-muted-foreground">
@@ -101,26 +98,26 @@ export function MarkdownBlock({ content }: MarkdownBlockProps) {
           <ul className="list-disc list-inside my-2 space-y-1">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="list-decimal list-inside my-2 space-y-1">{children}</ol>
+          <ol className="list-decimal list-inside my-2 space-y-1">
+            {children}
+          </ol>
         ),
         code: ({ node, inline, className, children, ...props }: CodeProps) => {
-          const match = /language-(\w+)/.exec(className || '');
-          const code = String(children).replace(/\n$/, '');
-          
+          const match = /language-(\w+)/.exec(className || "");
+          const code = String(children).replace(/\n$/, "");
+
           if (!inline && match) {
             const language = match[1];
-            const displayLanguage = language.charAt(0).toUpperCase() + language.slice(1);
-            
+            const displayLanguage =
+              language.charAt(0).toUpperCase() + language.slice(1);
+
             return (
               <CodeBlockWrapper code={code} language={displayLanguage}>
-                <CodeHighlighter
-                  code={code}
-                  extension={`.${language}`}
-                />
+                <CodeHighlighter code={code} extension={`.${language}`} />
               </CodeBlockWrapper>
             );
           }
-          
+
           return (
             <code className="bg-muted px-1.5 py-0.5 rounded-md" {...props}>
               {children}

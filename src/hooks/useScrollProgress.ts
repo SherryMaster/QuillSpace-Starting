@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from "react";
 
 export function useScrollProgress() {
   const [progress, setProgress] = useState(0);
@@ -25,10 +25,10 @@ export function useScrollProgress() {
     resizeObserver.observe(document.body);
 
     // Handle scroll events
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
       resizeObserver.disconnect();
     };
   }, [handleScroll]);

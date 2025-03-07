@@ -2,12 +2,15 @@ import { ReactNode, JSX } from "react";
 import { TableOfContents } from "@/components/navigation/TableOfContents";
 import { ThemeToggle } from "@/theme/ThemeToggle";
 import { ExpandedProvider } from "@/contexts/ExpandedContext";
-import { MobileMenuProvider, useMobileMenu } from "@/contexts/MobileMenuContext";
+import {
+  MobileMenuProvider,
+  useMobileMenu,
+} from "@/contexts/MobileMenuContext";
 import { cn } from "@/utils/common";
-import { FloatingNavbar } from './FloatingNavbar';
+import { FloatingNavbar } from "./FloatingNavbar";
 // import { ScrollProgress } from "@/components/navigation/ScrollProgress";
-import { ColorToken } from '@/types/colors';
-import { getColorClass } from '@/utils/colors';
+import { ColorToken } from "@/types/colors";
+import { getColorClass } from "@/utils/colors";
 
 export interface InteractiveContentLayoutProps {
   children: ReactNode;
@@ -20,18 +23,18 @@ export interface InteractiveContentLayoutProps {
 
 const getGradientConfig = (color: ColorToken) => ({
   text: cn(
-    getColorClass(color, 'text'),
-    'relative z-10',  // Add z-index to ensure text stays above the glow
-    'bg-gradient-to-r',
+    getColorClass(color, "text"),
+    "relative z-10", // Add z-index to ensure text stays above the glow
+    "bg-gradient-to-r",
     `from-${color}-500 via-${color}-400 to-${color}-500`,
-    'bg-clip-text text-transparent'
+    "bg-clip-text text-transparent",
   ),
   glow: cn(
-    'absolute inset-0 -z-10',  // Position behind the text
-    'bg-gradient-to-r',
+    "absolute inset-0 -z-10", // Position behind the text
+    "bg-gradient-to-r",
     `from-${color}-500/50 via-${color}-400/50 to-${color}-500/50`,
-    'blur-lg'
-  )
+    "blur-lg",
+  ),
 });
 
 function MobileMenuBackdrop() {
@@ -42,8 +45,10 @@ function MobileMenuBackdrop() {
       className={cn(
         "fixed inset-0 bg-background/80 z-40",
         "lg:hidden",
-        isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
-        "transition-opacity duration-300"
+        isOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none",
+        "transition-opacity duration-300",
       )}
       onClick={close}
     />
@@ -56,9 +61,8 @@ export function InteractiveContentLayout({
   titleBG = "blue",
   subtitle,
   showTableOfContents = true,
-  emphasizedColors = "blue"
+  emphasizedColors = "blue",
 }: InteractiveContentLayoutProps) {
-  
   const renderTitle = (titleText: string) => {
     // Updated regex to match text between single quotes
     const regex = /'([^']+)'/g;
@@ -81,7 +85,8 @@ export function InteractiveContentLayout({
       // Determine the color to use
       let currentColor: ColorToken;
       if (Array.isArray(emphasizedColors)) {
-        currentColor = emphasizedColors[emphasisCount % emphasizedColors.length] || 'blue';
+        currentColor =
+          emphasizedColors[emphasisCount % emphasizedColors.length] || "blue";
       } else {
         currentColor = emphasizedColors;
       }
@@ -91,11 +96,9 @@ export function InteractiveContentLayout({
       // Add the emphasized part
       parts.push(
         <span key={match.index} className="relative inline-block">
-          <span className={gradientConfig.text}>
-            {match[1]}
-          </span>
+          <span className={gradientConfig.text}>{match[1]}</span>
           <span className={gradientConfig.glow} aria-hidden="true" />
-        </span>
+        </span>,
       );
 
       lastIndex = match.index + match[0].length;
@@ -113,12 +116,14 @@ export function InteractiveContentLayout({
   return (
     <ExpandedProvider>
       <MobileMenuProvider>
-        <div className={cn(
-          "min-h-screen bg-background",
-          getColorClass(titleBG, 'bg', 5)
-        )}>
+        <div
+          className={cn(
+            "min-h-screen bg-background",
+            getColorClass(titleBG, "bg", 5),
+          )}
+        >
           <FloatingNavbar />
-          
+
           <div className="container-base">
             <div className="flex items-center justify-end py-4 lg:py-4">
               <div className="flex items-center">
@@ -129,13 +134,15 @@ export function InteractiveContentLayout({
 
           <div className="pt-4 lg:pt-0">
             <header className="container-base pb-6">
-              <div className={cn(
-                "rounded-lg p-6",
-                `gradient-heading-${titleBG}`  // Using the gradient heading classes from index.css
-              )}>
-                <h1 className={cn(
-                  "text-3xl lg:text-4xl font-bold text-center",
-                )}>
+              <div
+                className={cn(
+                  "rounded-lg p-6",
+                  `gradient-heading-${titleBG}`, // Using the gradient heading classes from index.css
+                )}
+              >
+                <h1
+                  className={cn("text-3xl lg:text-4xl font-bold text-center")}
+                >
                   {renderTitle(title)}
                 </h1>
                 {subtitle && (
@@ -154,10 +161,12 @@ export function InteractiveContentLayout({
                   </aside>
                 )}
 
-                <main className={cn(
-                  "flex-1 order-2 space-y-8 mb-16",
-                  !showTableOfContents && "lg:w-full"
-                )}>
+                <main
+                  className={cn(
+                    "flex-1 order-2 space-y-8 mb-16",
+                    !showTableOfContents && "lg:w-full",
+                  )}
+                >
                   {children}
                 </main>
               </div>

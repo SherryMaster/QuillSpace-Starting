@@ -7,7 +7,7 @@ interface VideoNavigationProps {
   currentIndex: number;
   total: number;
   isTransitioning: boolean;
-  videoTitle?: string;    // Only keep the current video title
+  videoTitle?: string; // Only keep the current video title
 }
 
 export function VideoNavigation({
@@ -16,7 +16,7 @@ export function VideoNavigation({
   currentIndex,
   total,
   isTransitioning,
-  videoTitle
+  videoTitle,
 }: VideoNavigationProps) {
   return (
     <div className="w-full mb-4 flex flex-col items-center gap-2">

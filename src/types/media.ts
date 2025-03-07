@@ -1,17 +1,17 @@
-import type { BaseBlockProps } from '@/components/contentblock/ContentBlock';
-import { ColorToken } from './colors';
+import type { BaseBlockProps } from "@/components/contentblock/ContentBlock";
+import { ColorToken } from "./colors";
 
-export type MediaType = 'Video' | 'Audio' | 'Image' | 'GIF';
+export type MediaType = "Video" | "Audio" | "Image" | "GIF";
 
 export interface VideoTimestamp {
-  time: number;      // Seconds
-  label: string;     // Description
+  time: number; // Seconds
+  label: string; // Description
   formattedTime: string; // HH:MM:SS format
   durationToNext?: string; // Duration until next timestamp or end
 }
 
 // Define literal union type for valid YouTube URL patterns
-export type YouTubeURLPattern = 
+export type YouTubeURLPattern =
   | `https://www.youtube.com/watch?v=${string}`
   | `https://youtu.be/${string}`
   | `https://www.youtube.com/embed/${string}`
@@ -36,7 +36,7 @@ interface BaseMediaBlockProps extends BaseBlockProps {
 
 // Video-specific base props (without url)
 interface BaseVideoBlockProps extends BaseMediaBlockProps {
-  mediaType: 'Video';
+  mediaType: "Video";
   title: string;
   timestampsColor?: ColorToken;
 }
@@ -64,27 +64,27 @@ export type VideoBlockProps = SingleVideoBlockProps | MultiVideoBlockProps;
 
 // Audio-specific props
 export interface AudioBlockProps extends BaseMediaBlockProps {
-  mediaType: 'Audio';
+  mediaType: "Audio";
   url: string;
 }
 
 // Image-specific props
 export interface ImageBlockProps extends BaseMediaBlockProps {
-  mediaType: 'Image';
+  mediaType: "Image";
   url: string;
 }
 
 // GIF-specific props
 export interface GifBlockProps extends BaseMediaBlockProps {
-  mediaType: 'GIF';
+  mediaType: "GIF";
   url: string;
 }
 
 // Union type for all media block props
-export type MediaBlockProps = 
-  | VideoBlockProps 
-  | AudioBlockProps 
-  | ImageBlockProps 
+export type MediaBlockProps =
+  | VideoBlockProps
+  | AudioBlockProps
+  | ImageBlockProps
   | GifBlockProps;
 
 export interface MultiVideoProps {

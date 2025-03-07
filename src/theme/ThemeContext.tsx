@@ -1,5 +1,11 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { setTheme } from '@/utils/common';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { setTheme } from "@/utils/common";
 
 interface ThemeContextType {
   isDark: boolean;
@@ -13,14 +19,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Initialize from document or system preference
-    const isDarkMode = document.documentElement.classList.contains("dark") ||
-      (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const isDarkMode =
+      document.documentElement.classList.contains("dark") ||
+      (window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
     setIsDark(isDarkMode);
-    setTheme(isDarkMode ? 'dark' : 'light');
+    setTheme(isDarkMode ? "dark" : "light");
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = isDark ? 'light' : 'dark';
+    const newTheme = isDark ? "light" : "dark";
     setTheme(newTheme);
     setIsDark(!isDark);
   };
@@ -35,7 +43,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
 }

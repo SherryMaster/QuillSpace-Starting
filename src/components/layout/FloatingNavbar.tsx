@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Menu } from 'lucide-react';
-import { ThemeToggle } from '@/theme/ThemeToggle';
-import { useMobileMenu } from '@/contexts/MobileMenuContext';
-import { cn } from '@/utils/common';
-import { useScrollProgress } from '@/hooks/useScrollProgress';
+import { useEffect, useState } from "react";
+import { Menu } from "lucide-react";
+import { ThemeToggle } from "@/theme/ThemeToggle";
+import { useMobileMenu } from "@/contexts/MobileMenuContext";
+import { cn } from "@/utils/common";
+import { useScrollProgress } from "@/hooks/useScrollProgress";
 
 interface FloatingNavbarProps {
   className?: string;
@@ -16,24 +16,24 @@ export function FloatingNavbar({ className }: FloatingNavbarProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      const header = document.querySelector('header');
+      const header = document.querySelector("header");
       if (!header) return;
       const headerBottom = header.getBoundingClientRect().bottom;
       setIsVisible(headerBottom < 0);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <nav
       className={cn(
-        'fixed top-0 left-0 right-0 z-50',
-        'bg-background/95 backdrop-blur-sm border-b',
-        'transition-transform duration-300 ease-in-out',
-        isVisible ? 'translate-y-0' : '-translate-y-full',
-        className
+        "fixed top-0 left-0 right-0 z-50",
+        "bg-background/95 backdrop-blur-sm border-b",
+        "transition-transform duration-300 ease-in-out",
+        isVisible ? "translate-y-0" : "-translate-y-full",
+        className,
       )}
     >
       {/* Main navbar content */}
@@ -53,11 +53,11 @@ export function FloatingNavbar({ className }: FloatingNavbarProps) {
         </div>
 
         {/* Progress bar */}
-        <div 
+        <div
           className="absolute bottom-0 left-0 w-full h-[2px] bg-muted/20"
           role="presentation"
         >
-          <div 
+          <div
             className={cn(
               "h-full bg-primary/80",
               "relative",
@@ -69,9 +69,9 @@ export function FloatingNavbar({ className }: FloatingNavbarProps) {
               "before:absolute before:inset-0",
               "before:bg-primary/20 before:blur-sm",
               // Smooth transition
-              "transition-all duration-150 ease-out"
+              "transition-all duration-150 ease-out",
             )}
-            style={{ 
+            style={{
               width: `${progress}%`,
             }}
             role="progressbar"

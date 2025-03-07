@@ -1,5 +1,5 @@
-import { Menu } from 'lucide-react';
-import { useMobileMenu } from '@/contexts/MobileMenuContext';
+import { Menu } from "lucide-react";
+import { useMobileMenu } from "@/contexts/MobileMenuContext";
 
 export function MobileMenuButton() {
   const { toggle } = useMobileMenu();

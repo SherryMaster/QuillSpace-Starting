@@ -1,22 +1,26 @@
-import { VideoTimestamp } from '@/types/media';
+import { VideoTimestamp } from "@/types/media";
 
-export function parseTimestamps(input: string | VideoTimestamp[]): VideoTimestamp[] {
+export function parseTimestamps(
+  input: string | VideoTimestamp[],
+): VideoTimestamp[] {
   if (Array.isArray(input)) return input;
 
-  return input.split('\n')
-    .map(line => {
+  return input
+    .split("\n")
+    .map((line) => {
       const match = line.match(/^(\d{1,2}:)?(\d{1,2}):(\d{2})\s*-\s*(.+)$/);
       if (!match) return null;
 
       const [_, hours, minutes, seconds, label] = match;
-      const time = (hours ? parseInt(hours) * 3600 : 0) +
-                   parseInt(minutes) * 60 +
-                   parseInt(seconds);
+      const time =
+        (hours ? parseInt(hours) * 3600 : 0) +
+        parseInt(minutes) * 60 +
+        parseInt(seconds);
 
       return {
         time,
         label: label.trim(),
-        formattedTime: formatTime(time)
+        formattedTime: formatTime(time),
       };
     })
     .filter((t): t is VideoTimestamp => t !== null);
@@ -26,19 +30,19 @@ export function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  return `${h ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  return `${h ? h + ":" : ""}${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
 export function convertToYouTubeEmbedURL(url: string): string {
   try {
     // First check if it's already an embed URL
-    if (url.includes('youtube.com/embed/')) {
+    if (url.includes("youtube.com/embed/")) {
       // Ensure clip parameters are preserved correctly
       const urlObj = new URL(url);
-      const videoId = urlObj.pathname.split('/').pop();
-      const clip = urlObj.searchParams.get('clip');
-      const clipt = urlObj.searchParams.get('clipt');
-      
+      const videoId = urlObj.pathname.split("/").pop();
+      const clip = urlObj.searchParams.get("clip");
+      const clipt = urlObj.searchParams.get("clipt");
+
       if (clip && clipt) {
         return `https://www.youtube.com/embed/${videoId}?clip=${clip}&clipt=${clipt}`;
       }
@@ -78,18 +82,18 @@ export function convertToYouTubeEmbedURL(url: string): string {
 
     // If no video ID found
     if (!videoId) {
-      throw new Error('Invalid YouTube URL');
+      throw new Error("Invalid YouTube URL");
     }
 
     // If it's a clip
     if (clipId) {
-      return `https://www.youtube.com/embed/${videoId}?clip=${clipId}&clipt=${clipTime || '1'}`;
+      return `https://www.youtube.com/embed/${videoId}?clip=${clipId}&clipt=${clipTime || "1"}`;
     }
 
     // Regular video URL
     return `https://www.youtube.com/embed/${videoId}`;
   } catch (error) {
-    console.error('Error converting YouTube URL:', error);
+    console.error("Error converting YouTube URL:", error);
     return url;
   }
 }
